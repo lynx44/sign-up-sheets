@@ -1,4 +1,4 @@
-=== Sign-up Sheet ===
+=== Sign-up Sheets ===
 Contributors: DLS Software Studios
 Tags: volunteer, signup, sign up
 Requires at least: 3.0
