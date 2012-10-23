@@ -29,7 +29,7 @@ Yes, in `Settings > Sign-up Sheets` you can specify any email you want.  It defa
 
 = How can I suggest an idea for the plugin? =
 
-Send us an email through our website at [http://www.dlssoftwarestudios.com/contact-us/]  We appreciate any and all feedback, but can't guarantee it will make it into the next version.  If you are in need a modification immediately, we are available for hire.  Please contact us at the link above and we can provide a quote.
+Send us an email through our website at http://www.dlssoftwarestudios.com/contact-us/  We appreciate any and all feedback, but can't guarantee it will make it into the next version.  If you are in need a modification immediately, we are available for hire.  Please contact us at the link above and we can provide a quote.
 
 
 == Screenshots ==
