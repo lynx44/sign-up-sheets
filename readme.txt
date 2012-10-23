@@ -12,7 +12,7 @@ An online sign-up sheet manager where your users/volunteers can sign up for task
 
 Sign-up Sheets allows you to have people sign up for different tasks and events that you set up.
 
-For more information, visit... [http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/]
+For more information, visit... http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 
 == Installation ==
 
