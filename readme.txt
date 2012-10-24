@@ -1,5 +1,5 @@
 === Sign-up Sheets ===
-Contributors: DLS Software Studios
+Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.0
 Tested up to: 3.4.1
