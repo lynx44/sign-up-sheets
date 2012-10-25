@@ -41,6 +41,10 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 3. Admin Edit Sign-up Sheet
 4. Frontend Example
 
+== Upgrade Notice ==
+
+= 1.0.1 =
+Fixed bug with sites using query strings on sign-up sheet page
 
 == Changelog ==
 
