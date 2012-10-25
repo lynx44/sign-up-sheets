@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0
+Version: 1.0.1
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -37,6 +37,8 @@ class DLS_Sign_Up_Sheet
     private $plugin_prefix = 'dls-sus';
     private $admin_settings_slug = 'dls-sus-settings';
     private $email_default_subject = 'Thank you for signing up!';
+    private $request_uri;
+    private $all_sheets_uri;
     public $db_version = '1.0';
     private $wp_roles;
     
@@ -47,6 +49,12 @@ class DLS_Sign_Up_Sheet
         $plugin = plugin_basename(__FILE__);
         
         $this->plugin_path = dirname(__FILE__).'/';
+        
+        $this->request_uri = $_SERVER['REQUEST_URI'] . ((strstr($_SERVER['REQUEST_URI'], '?') === false) ? '?' : '&amp;');
+
+        $this->all_sheets_uri = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], "sheet_id="));
+        if (substr($this->all_sheets_uri, -1) == '?') $this->all_sheets_uri = substr($this->all_sheets_uri, 0, strlen($this->all_sheets_uri)-1);
+        if (substr($this->all_sheets_uri, -1) == '&') $this->all_sheets_uri = substr($this->all_sheets_uri, 0, strlen($this->all_sheets_uri)-1);
 
         add_shortcode('sign_up_sheet', array(&$this, 'display_sheet'));
         register_activation_hook(__FILE__, array(&$this, 'activate'));
@@ -66,6 +74,7 @@ class DLS_Sign_Up_Sheet
      * Output the volunteer signup form
      * 
      * @param   array   attributes from shortcode call
+     * @todo    improve captcha
      */
     function display_sheet($atts)
     {
@@ -101,10 +110,10 @@ class DLS_Sign_Up_Sheet
                             $open_spots = ($this->data->get_sheet_total_spots($sheet->id) - $this->data->get_sheet_signup_count($sheet->id));
                             echo '
                                 <tr'.(($open_spots === 0) ? ' class="filled"' : '').'>
-                                    <td class="column-title"><a href="'.$_SERVER['REQUEST_URI'].'?sheet_id='.$sheet->id.'">'.$sheet->title.'</a></td>
+                                    <td class="column-title"><a href="'.$this->request_uri.'sheet_id='.$sheet->id.'">'.$sheet->title.'</a></td>
                                     <td class="column-date">'.(($sheet->date == '0000-00-00') ? 'N/A' : date(get_option('date_format'), strtotime($sheet->date))).'</td>
                                     <td class="column-open_spots">'.$open_spots.'</td>
-                                    <td class="column-view_link">'.(($open_spots > 0) ? '<a href="'.$_SERVER['REQUEST_URI'].'?sheet_id='.$sheet->id.'">View &amp; sign-up &raquo;</a>' : '&#10004; Filled').'</td>
+                                    <td class="column-view_link">'.(($open_spots > 0) ? '<a href="'.$this->request_uri.'sheet_id='.$sheet->id.'">View &amp; sign-up &raquo;</a>' : '&#10004; Filled').'</td>
                                 </tr>
                             ';
                         }
@@ -122,10 +131,8 @@ class DLS_Sign_Up_Sheet
                 return false;
             } else {
                 
-                $all_url = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], "sheet_id="));
-                if (substr($all_url, -1) == '?') $all_url = substr($all_url, 0, strlen($all_url)-1);
                 echo '
-                    <p><a href="'.$all_url.'">&laquo; View all Sign-up Sheets</a></p>
+                    <p><a href="'.$this->all_sheets_uri.'">&laquo; View all Sign-up Sheets</a></p>
                     <div class="dls-sus-sheet">
                         <h2>'.$sheet->title.'</h2>
                 ';
@@ -212,9 +219,7 @@ class DLS_Sign_Up_Sheet
                                             }
 										    for ($i=$i; $i<=$task->qty; $i++) {
 											    if ($i != 1) echo '<br />';
-	                                    	    echo '#'.$i.': <a href="'.$_SERVER['REQUEST_URI'];
-                                                echo ((strstr($_SERVER['REQUEST_URI'], '?') === false) ? '?' : '&amp;');
-                                                echo 'task_id='.$task->id.'">Sign up &raquo;</a>';
+	                                    	    echo '#'.$i.': <a href="'.$this->request_uri.'task_id='.$task->id.'">Sign up &raquo;</a>';
 										    }
 										    
 										    echo '
@@ -263,7 +268,7 @@ class DLS_Sign_Up_Sheet
                     <input type="hidden" name="signup_task_id" value="'.esc_attr($_GET['task_id']).'" />
                 	<input type="hidden" name="mode" value="submitted" />
                 	<input type="submit" name="Submit" class="button-primary" value="'.esc_attr('Sign me up!').'" />
-                    or <a href="?">&laquo; go back to the Sign-Up Sheet</a>
+                    or <a href="'.$this->all_sheets_uri.((strstr($this->all_sheets_uri, '?') === false) ? '?' : '&amp;').'sheet_id='.$_GET['sheet_id'].'">&laquo; go back to the Sign-Up Sheet</a>
                 </p>
 			</form>
 		';
