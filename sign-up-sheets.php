@@ -177,7 +177,7 @@ class DLS_Sign_Up_Sheet
 			    if (!$submitted || $err) {
 				    if (isset($_GET['task_id'])) {
 					    $return .= $this->display_signup_form($_GET['task_id']);
-					    return false;
+					    return $return;
 				    }
 			    }
 			    
@@ -274,6 +274,7 @@ class DLS_Sign_Up_Sheet
                 </p>
 			</form>
 		';
+        return $return;
 	}
         
     /**
