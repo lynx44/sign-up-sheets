@@ -3,7 +3,7 @@ Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 
 An online sign-up sheet manager where your users/volunteers can sign up for tasks
@@ -23,7 +23,7 @@ Sign-up Sheets allows you to have people sign up for different tasks and events 
 
 = How do I create a Sign-up Sheet page on my site? =
 
-You can do this by creating any page or post and adding the shortcode `[sign_up_sheet]` to the content.
+You can do this by creating any page or post and adding the shortcode `[sign_up_sheet]` to the content.  Then, go to the "Sign-up Sheets" section of your WP admin and create a new sheet.
 
 = Can I change the "from" address on the confirmation email? =
 
@@ -43,10 +43,16 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 
 == Upgrade Notice ==
 
+= 1.0.2 =
+Fixed bug with `[sign_up_sheet]` shortcode sometimes messing up headers in certain themes
+
 = 1.0.1 =
 Fixed bug with sites using query strings on sign-up sheet page
 
 == Changelog ==
+
+= 1.0.2 =
+* Fixed bug with `[sign_up_sheet]` shortcode sometimes messing up headers in certain themes
 
 = 1.0.1 =
 * Fixed bug with sites using query strings on sign-up sheet page

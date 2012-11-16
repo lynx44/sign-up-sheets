@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.1
+Version: 1.0.2
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -88,13 +88,13 @@ class DLS_Sign_Up_Sheet
         if ($id === false) {
             
             // Display all active
-            echo '<h2>'.$list_title.'</h2>';
+            $return = '<h2>'.$list_title.'</h2>';
             $sheets = $this->data->get_sheets(false, true);
             $sheets = array_reverse($sheets);
             if (empty($sheets)) {
-                echo '<p>No sheets currently available at this time.</p>';
+                $return .= '<p>No sheets currently available at this time.</p>';
             } else {
-                echo '
+                $return .= '
                     <table class="dls-sus-sheets" cellspacing="0">
                         <thead>
                             <tr>
@@ -108,7 +108,7 @@ class DLS_Sign_Up_Sheet
                         ';
                         foreach ($sheets AS $sheet) {
                             $open_spots = ($this->data->get_sheet_total_spots($sheet->id) - $this->data->get_sheet_signup_count($sheet->id));
-                            echo '
+                            $return .= '
                                 <tr'.(($open_spots === 0) ? ' class="filled"' : '').'>
                                     <td class="column-title"><a href="'.$this->request_uri.'sheet_id='.$sheet->id.'">'.$sheet->title.'</a></td>
                                     <td class="column-date">'.(($sheet->date == '0000-00-00') ? 'N/A' : date(get_option('date_format'), strtotime($sheet->date))).'</td>
@@ -117,7 +117,7 @@ class DLS_Sign_Up_Sheet
                                 </tr>
                             ';
                         }
-                        echo '
+                        $return .= '
                         <tbody>
                     </table>
                 ';
@@ -127,11 +127,11 @@ class DLS_Sign_Up_Sheet
             
             // Display Individual Sheet
             if (($sheet = $this->data->get_sheet($id)) === false) {
-                echo '<p>Sign-up sheet not found.</p>';
+                $return .= '<p>Sign-up sheet not found.</p>';
                 return false;
             } else {
                 
-                echo '
+                $return .= '
                     <p><a href="'.$this->all_sheets_uri.'">&laquo; View all Sign-up Sheets</a></p>
                     <div class="dls-sus-sheet">
                         <h2>'.$sheet->title.'</h2>
@@ -153,21 +153,21 @@ class DLS_Sign_Up_Sheet
 					    || empty($_POST['spam_check'])
 				    ) {
 					    $err++;
-					    echo '<p class="dls-sus error">'.__('Please complete all fields.').'</p>';
+					    $return .= '<p class="dls-sus error">'.__('Please complete all fields.').'</p>';
 				    } elseif (empty($_POST['spam_check']) || (!empty($_POST['spam_check']) && trim($_POST['spam_check']) != '8')) {
                         $err++;
-                        echo '<p class="dls-sus error">'.__('Oh dear, 7 + 1 does not equal '.esc_attr($_POST['spam_check']).'. Please try again.').'</p>';
+                        $return .= '<p class="dls-sus error">'.__('Oh dear, 7 + 1 does not equal '.esc_attr($_POST['spam_check']).'. Please try again.').'</p>';
                     }
                     
                     // Add Signup
                     if (!$err) {
                         if ($this->data->add_signup($_POST, $_GET['task_id']) === false) {
                             $err++;
-                            echo '<p class="dls-sus error">'.__('Error adding signup record.  Please try again.').'</p>';
+                            $return .= '<p class="dls-sus error">'.__('Error adding signup record.  Please try again.').'</p>';
                         } else {
                             $success = true;
-                            echo '<p class="dls-sus updated">'.__('You have been signed up!').'</p>';
-                            if ($this->send_mail($_POST['signup_email'], $_GET['task_id']) === false) { echo 'ERROR SENDING EMAIL'; }
+                            $return .= '<p class="dls-sus updated">'.__('You have been signed up!').'</p>';
+                            if ($this->send_mail($_POST['signup_email'], $_GET['task_id']) === false) $return .= 'ERROR SENDING EMAIL';
                         }
                     }
                     
@@ -176,14 +176,14 @@ class DLS_Sign_Up_Sheet
                 // Display Sign-up Form
 			    if (!$submitted || $err) {
 				    if (isset($_GET['task_id'])) {
-					    $this->display_signup_form($_GET['task_id']);
+					    $return .= $this->display_signup_form($_GET['task_id']);
 					    return false;
 				    }
 			    }
 			    
 			    // Sheet Details
 			    if (!$submitted || $success || $err) {
-	                echo '
+	                $return .= '
                         '.(($sheet->date) ? '<p>Date: '.date(get_option('date_format'), strtotime($sheet->date)).'</p>' : '' ).'
 	                    <p>'.$sheet->details.'</p>
 	                    <h3>Sign up below...</h3>
@@ -191,9 +191,9 @@ class DLS_Sign_Up_Sheet
 				    
 	                // Tasks
 	                if (!($tasks = $this->data->get_tasks($sheet->id))) {
-	                    echo '<p>No tasks were found.</p>';
+	                    $return .= '<p>No tasks were found.</p>';
 	                } else {
-	                    echo '
+	                    $return .= '
 	                        <table class="dls-sus-tasks" cellspacing="0">
 	                            <thead>
 	                                <tr>
@@ -204,7 +204,7 @@ class DLS_Sign_Up_Sheet
 	                            <tbody>
 	                            ';
 	                            foreach ($tasks AS $task) {
-	                                echo '
+	                                $return .= '
 	                                    <tr>
 	                                        <td>'.$task->title.'</td>
 	                                        <td>
@@ -213,21 +213,21 @@ class DLS_Sign_Up_Sheet
                                             $i=1;
                                             $signups = $this->data->get_signups($task->id);
                                             foreach ($signups AS $signup) {
-                                                if ($i != 1) echo '<br />';
-                                                echo '#'.$i.': <em>'.$signup->firstname.' '.substr($signup->lastname, 0, 1).'.</em>';
+                                                if ($i != 1) $return .= '<br />';
+                                                $return .= '#'.$i.': <em>'.$signup->firstname.' '.substr($signup->lastname, 0, 1).'.</em>';
                                                 $i++;
                                             }
 										    for ($i=$i; $i<=$task->qty; $i++) {
-											    if ($i != 1) echo '<br />';
-	                                    	    echo '#'.$i.': <a href="'.$this->request_uri.'task_id='.$task->id.'">Sign up &raquo;</a>';
+											    if ($i != 1) $return .= '<br />';
+	                                    	    $return .= '#'.$i.': <a href="'.$this->request_uri.'task_id='.$task->id.'">Sign up &raquo;</a>';
 										    }
 										    
-										    echo '
+										    $return .= '
 										    </td>
 	                                    </tr>
 	                                ';
 	                            }
-	                            echo '
+	                            $return .= '
 	                            </tbody>
 	                        </table>
 	                    ';
@@ -235,12 +235,14 @@ class DLS_Sign_Up_Sheet
 	            }
             }
         }
+        
+        return $return;
     }
 
 	public function display_signup_form($task_id)
 	{	
         $task = $this->data->get_task($task_id);
-		echo '
+		$return = '
 			<h3>Sign-up below</h3>
             <p>You are signing up for... <em>'.$task->title.'</em></p>
 			<form name="form1" method="post" action="">
