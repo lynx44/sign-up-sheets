@@ -1,7 +1,7 @@
 === Sign-up Sheets ===
 Contributors: dlsstudios
 Tags: volunteer, signup, sign up
-Requires at least: 3.0
+Requires at least: 3.3
 Tested up to: 3.4.1
 Stable tag: 1.0.2
 License: GPLv2 or later
