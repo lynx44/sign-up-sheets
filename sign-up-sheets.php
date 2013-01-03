@@ -930,4 +930,3 @@ class DLS_Sign_Up_Sheet
 }
 
 $dls_sus = new DLS_Sign_Up_Sheet();
-?>

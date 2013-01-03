@@ -63,4 +63,3 @@ class DLS_SUS_Export
 }
 $e = new DLS_SUS_Export();
 $e->create();
-?>
