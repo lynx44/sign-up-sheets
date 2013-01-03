@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.2
+Version: 1.0.3
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -118,7 +118,7 @@ class DLS_Sign_Up_Sheet
                             ';
                         }
                         $return .= '
-                        <tbody>
+                        </tbody>
                     </table>
                 ';
             }
@@ -233,6 +233,9 @@ class DLS_Sign_Up_Sheet
 	                    ';
 	                }
 	            }
+                
+                $return .= '</div><!-- .dls-sus-sheet -->';
+                
             }
         }
         
@@ -251,7 +254,7 @@ class DLS_Sign_Up_Sheet
 					<input type="text" id="signup_firstname" name="signup_firstname" value="'.((isset($_POST['signup_firstname'])) ? esc_attr($_POST['signup_firstname']) : '').'" />
 				</p>
 				<p>
-					<label for=signup_"lastname">Last Name</label>
+					<label for="signup_lastname">Last Name</label>
 					<input type="text" id="signup_lastname" name="signup_lastname" value="'.((isset($_POST['signup_lastname'])) ? esc_attr($_POST['signup_lastname']) : '').'" />
 				</p>
 				<p>
@@ -274,6 +277,7 @@ class DLS_Sign_Up_Sheet
                 </p>
 			</form>
 		';
+        $return .= '</div><!-- .dls-sus-sheet -->';
         return $return;
 	}
         

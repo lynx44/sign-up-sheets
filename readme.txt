@@ -2,8 +2,8 @@
 Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.3
-Tested up to: 3.4.1
-Stable tag: 1.0.2
+Tested up to: 3.5
+Stable tag: 1.0.3
 License: GPLv2 or later
 
 An online sign-up sheet manager where your users/volunteers can sign up for tasks
@@ -42,6 +42,10 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 4. Frontend Example
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Fixed compatibility bug with WordPress v3.5 prepare statement
+Cleaned markup for standards compliance and missing closing tags
 
 = 1.0.2 =
 Fixed bug with `[sign_up_sheet]` shortcode sometimes messing up headers in certain themes

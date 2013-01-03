@@ -56,13 +56,13 @@ class DLS_SUS_Data
      */
     public function get_sheets($trash=false, $active_only=false)
     {
-        $results = $this->wpdb->get_results($this->wpdb->prepare("
+        $results = $this->wpdb->get_results("
             SELECT * 
             FROM ".$this->tables['sheet']['name']." 
             WHERE trash = ".(($trash) ? "TRUE" : "FALSE")."
             ".(($active_only) ? " AND date >= NOW() OR date = '0000-00-00'" : "")."
             ORDER BY date DESC, id DESC
-        "));
+        ");
         $results = $this->stripslashes_full($results);
         return $results;
     }
@@ -84,11 +84,11 @@ class DLS_SUS_Data
     */
     public function get_sheet_count($trash=false)
     { 
-        $results = $this->wpdb->get_results($this->wpdb->prepare("
+        $results = $this->wpdb->get_results("
             SELECT COUNT(*) AS count 
             FROM ".$this->tables['sheet']['name']." 
             WHERE trash = ".(($trash) ? "TRUE" : "FALSE")."
-        "));
+        ");
         $results = $this->stripslashes_full($results);
         return $results[0]->count;
     }
