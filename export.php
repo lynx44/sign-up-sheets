@@ -2,7 +2,7 @@
 /**
 * Export Sign-up Sheets to a File
 */
-require_once $_SERVER['DOCUMENT_ROOT'].'/wp-load.php';
+require_once '../../../wp-load.php';
 
 if (!class_exists('DLS_SUS_Data')) require_once 'data.php';
 

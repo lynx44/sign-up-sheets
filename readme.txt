@@ -3,7 +3,7 @@ Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 
 An online sign-up sheet manager where your users/volunteers can sign up for tasks
@@ -43,17 +43,29 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 
 == Upgrade Notice ==
 
+= 1.0.4 =
+* Fixed export CSV bug when WordPress is installed in a subfolder
+* Added option for detailed debug messages
+
 = 1.0.3 =
-Fixed compatibility bug with WordPress v3.5 prepare statement
-Cleaned markup for standards compliance and missing closing tags
+* Fixed compatibility bug with WordPress v3.5 prepare statement
+* Cleaned markup for standards compliance and missing closing tags
 
 = 1.0.2 =
-Fixed bug with `[sign_up_sheet]` shortcode sometimes messing up headers in certain themes
+* Fixed bug with `[sign_up_sheet]` shortcode sometimes messing up headers in certain themes
 
 = 1.0.1 =
-Fixed bug with sites using query strings on sign-up sheet page
+* Fixed bug with sites using query strings on sign-up sheet page
 
 == Changelog ==
+
+= 1.0.4 =
+* Fixed export CSV bug when WordPress is installed in a subfolder
+* Added option for detailed debug messages
+
+= 1.0.3 =
+* Fixed compatibility bug with WordPress v3.5 prepare statement
+* Cleaned markup for standards compliance and missing closing tags
 
 = 1.0.2 =
 * Fixed bug with `[sign_up_sheet]` shortcode sometimes messing up headers in certain themes

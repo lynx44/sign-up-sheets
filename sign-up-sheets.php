@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.3
+Version: 1.0.4
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -41,10 +41,16 @@ class DLS_Sign_Up_Sheet
     private $all_sheets_uri;
     public $db_version = '1.0';
     private $wp_roles;
+    public $detailed_errors = false;
     
     public function __construct()
     {
         $this->data = new DLS_SUS_Data();
+        
+        if (get_option('dls_sus_detailed_errors') === 'true') {
+            $this->detailed_errors = true;
+            $this->data->detailed_errors = true;
+        }
         
         $plugin = plugin_basename(__FILE__);
         
@@ -161,13 +167,14 @@ class DLS_Sign_Up_Sheet
                     
                     // Add Signup
                     if (!$err) {
-                        if ($this->data->add_signup($_POST, $_GET['task_id']) === false) {
-                            $err++;
-                            $return .= '<p class="dls-sus error">'.__('Error adding signup record.  Please try again.').'</p>';
-                        } else {
+                        try {
+                            $this->data->add_signup($_POST, $_GET['task_id']);
                             $success = true;
                             $return .= '<p class="dls-sus updated">'.__('You have been signed up!').'</p>';
                             if ($this->send_mail($_POST['signup_email'], $_GET['task_id']) === false) $return .= 'ERROR SENDING EMAIL';
+                        } catch (SUS_Data_Exception $e) {
+                            $err++;
+                            $return .= '<p class="dls-sus error">'.__($e->getMessage()).'</p>';
                         }
                     }
                     
@@ -305,8 +312,9 @@ class DLS_Sign_Up_Sheet
         
         $options = array(
             'Confirmation E-mail Settings',
-            array('Subject', 'dls_sus_email_subject', '(If blank, defaults to... "'.$this->email_default_subject.'")'),
-            array('From E-mail Address', 'dls_sus_email_from', '(If blank, defaults to WordPress email on file under Settings > General)'),
+            array('Subject', 'dls_sus_email_subject', 'text', '(If blank, defaults to... "'.$this->email_default_subject.'")'),
+            array('From E-mail Address', 'dls_sus_email_from', 'text', '(If blank, defaults to WordPress email on file under Settings > General)'),
+            array('Display detailed errors', 'dls_sus_detailed_errors', 'checkbox', '(It is recommended to leave this un-checked for production sites)'),
         );
         $hidden_field_name = 'submit_hidden';
         
@@ -327,7 +335,8 @@ class DLS_Sign_Up_Sheet
                         if ($key === 0) echo '<table class="form-table">';
                         $opt_label = $o[0];
                         $opt_name = $o[1];
-                        $opt_note = $o[2];
+                        $opt_type = $o[2];
+                        $opt_note = $o[3];
                         $opt_val = get_option($opt_name);
                             
                         if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
@@ -336,12 +345,27 @@ class DLS_Sign_Up_Sheet
                             $num_saved++;
                             if ($num_saved === 1) echo '<div class="updated"><p><strong>'.__('Settings saved.', 'dls-sus-menu').'</strong></p></div>';
                         }
-
+                        
                         echo '
                             <tr valign="top">
                                 <th scope="row">'.__($opt_label.":", 'dls-sus-menu').'</th>
                                 <td>
-                                    <input type="text" name="'.$opt_name.'" value="'.esc_attr($opt_val).'" size="20">
+                                    ';
+                                    
+                                    switch ($opt_type) {
+                                        case 'text':
+                                            echo '
+                                                <input type="text" name="'.$opt_name.'" value="'.esc_attr($opt_val).'" size="20">
+                                            ';
+                                            break;
+                                        case 'checkbox':
+                                            echo '
+                                                <input type="checkbox" name="'.$opt_name.'" value="true"'.(($opt_val === 'true') ? ' checked="checked"' : '').' size="20">
+                                            ';
+                                            break;
+                                    }
+                                    
+                                    echo '
                                     <span class="description">'.$opt_note.'</span>
                                 </tr>
                             </tr>
@@ -375,12 +399,13 @@ class DLS_Sign_Up_Sheet
             
         // Remove signup record
         if (isset($_GET['action']) && $_GET['action'] == 'clear') {
-            if (($result = $this->data->delete_signup($_GET['signup_id'])) === false) {
-                $err = true;
-                echo '<div class="error"><p>Error clearing spot (ID #'.esc_attr($_GET['signup_id']).')</p></div>';
-            } else {
+            try {
+                $result = $this->data->delete_signup($_GET['signup_id']);
                 $success = true;
                 if ($result > 0) echo '<div class="updated"><p>Spot has been cleared.</p></div>';
+            } catch (SUS_Data_Exception $e) {
+                $err = true;
+                echo '<div class="error"><p>Error clearing spot (ID #'.esc_attr($_GET['signup_id']).')</p></div>';
             }
         }
         
@@ -400,28 +425,32 @@ class DLS_Sign_Up_Sheet
         ';
         
         if ($untrash) {
-            if (($result = $this->data->update_sheet(array('sheet_trash'=>false), $_GET['sheet_id'])) === false) {
-                echo '<div class="error"><p>Error restoring sheet.</p></div>';
-            } elseif ($result > 0) {
+            try {
+                $result = $this->data->update_sheet(array('sheet_trash'=>false), $_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been restored.</p></div>';
+            } catch (SUS_Data_Exception $e) {
+                echo '<div class="error"><p>Error restoring sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         } elseif ($trash) {
-            if (($result = $this->data->update_sheet(array('sheet_trash'=>true), $_GET['sheet_id'])) === false) {
-                echo '<div class="error"><p>Error moving sheet to trash.</p></div>';
-            } elseif ($result > 0) {
+            try {
+                $result = $this->data->update_sheet(array('sheet_trash'=>true), $_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been moved to trash.</p></div>';
+            } catch (SUS_Data_Exception $e) {
+                echo '<div class="error"><p>Error moving sheet to trash.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         } elseif ($delete) {
-            if (($result = $this->data->delete_sheet($_GET['sheet_id'])) === false) {
-                echo '<div class="error"><p>Error permanently deleting sheet.</p></div>';
-            } elseif ($result > 0) {
+            try {
+                $result = $this->data->delete_sheet($_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been permanently deleted.</p></div>';
+            } catch (SUS_Data_Exception $e) {
+                echo '<div class="error"><p>Error permanently deleting sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         } elseif ($copy) {
-            if (($new_id = $this->data->copy_sheet($_GET['sheet_id'])) === false) {
-                echo '<div class="error"><p>Error copying sheet.</p></div>';
-            } else {
+            try {
+                $new_id = $this->data->copy_sheet($_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been copied to new sheet ID #'.$new_id.' (<a href="?page='.$this->admin_settings_slug.'_modify_sheet&amp;sheet_id='.$new_id.'">Edit</a>).</p></div>';
+            } catch (SUS_Data_Exception $e) {
+                echo '<div class="error"><p>Error copying sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         }
         
@@ -544,16 +573,11 @@ class DLS_Sign_Up_Sheet
         if($submitted) {
             
             // Sheet
-            if (
-                ($add && ($result = $this->data->add_sheet($_POST)) === false)
-                || ($edit && ($result = $this->data->update_sheet($_POST, $_GET['sheet_id'])) === false)
-            ) {
+            try {
                 
-                $err++;
-                echo '<div class="error"><p><strong>'.__('Error '.(($add) ? 'adding' : 'updating').' sheet.', 'dls-sus-menu').'</strong></p></div>';
-            
-            } else {
-                
+                if ($add) $result = $this->data->add_sheet($_POST);
+                else if ($edit) $result = $this->data->update_sheet($_POST, $_GET['sheet_id']);
+
                 // Tasks
                 echo '<div class="updated"><p><strong>'.__('Sheet saved.', 'dls-sus-menu').'</strong></p></div>';
                 $sheet_id = ($add) ? $this->data->wpdb->insert_id : $_GET['sheet_id'];
@@ -624,8 +648,11 @@ class DLS_Sign_Up_Sheet
                     }
                 }
                 
-                
+            } catch (SUS_Data_Exception $e) {
+                $err++;
+                echo '<div class="error"><p><strong>'.__($e->getMessage()).'</strong></p></div>';
             }
+            
         }
         
         // Set field values for form
@@ -708,8 +735,9 @@ class DLS_Sign_Up_Sheet
     * 
     * @param    string  the email to send the message to
     * @return   bool
+    * @todo     add error catching for wp_mail
     */
-    private function send_mail($to, $task_id)
+    public function send_mail($to, $task_id)
     {
         $task = $this->data->get_task($task_id);
         $sheet = $this->data->get_sheet($task->sheet_id);
