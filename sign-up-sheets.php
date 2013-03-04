@@ -792,6 +792,7 @@ class DLS_Sign_Up_Sheet
     */
     function add_scripts_to_admin() {
         wp_enqueue_script('jquery-ui-datepicker');
+        wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_style( 'jquery.ui.theme', plugins_url( '/css/smoothness/jquery.ui.datepicker.css', __FILE__ ) );
     }
     
@@ -848,7 +849,7 @@ class DLS_Sign_Up_Sheet
         <script type="text/javascript">
         (function($) {    
             $(document).ready(function(){ 
-                
+                console.log('a');//debug
                 if ($('.tasks LI').is('*')) {
                     var last_css_id = $(".tasks LI").last().attr('id');
                     var row_key = last_css_id.substr(last_css_id.indexOf("-") + 1);

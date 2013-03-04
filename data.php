@@ -244,7 +244,7 @@ class DLS_SUS_Data
         $task = $this->get_task($task_id);
         $signups = $this->get_signups($task_id);
         if (count($signups) >= $task->qty) {
-            throw new SUS_Data_Exception('Error adding signup.  All spots are filled.');
+            throw new SUS_Data_Exception('Error adding signup.  All spots are filled.'. (($this->detailed_errors === true) ? ' Current Signups: '.count($signups).', Total Spots:'.$task->qty : ''));
             return false;
         }
         
