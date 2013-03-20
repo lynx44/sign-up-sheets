@@ -383,7 +383,7 @@ class DLS_SUS_Data
         $clean_fields = array();
         foreach ($input AS $k=>$v) {
             if ($prefix === false || (substr($k, 0, strlen($prefix)) == $prefix)) {
-                $clean_fields[str_replace($prefix, '', $k)] = $v;
+                $clean_fields[str_replace($prefix, '', $k)] = ($prefix == 'signup_') ? sanitize_text_field($v) : $v;
             }
         }
         return $clean_fields;

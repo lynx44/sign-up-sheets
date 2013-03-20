@@ -3,7 +3,7 @@ Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 
 An online sign-up sheet manager where your users/volunteers can sign up for tasks
@@ -43,6 +43,9 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 
 == Upgrade Notice ==
 
+= 1.0.6 =
+* Security fix for sign-up form
+
 = 1.0.5 =
 * Fixed task sorting
 * Added additional error detail on adding a signup
@@ -62,6 +65,9 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 * Fixed bug with sites using query strings on sign-up sheet page
 
 == Changelog ==
+
+= 1.0.6 =
+* Security fix for sign-up form
 
 = 1.0.5 =
 * Fixed task sorting
