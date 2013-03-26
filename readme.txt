@@ -1,4 +1,4 @@
-=== Sign-up Sheets ===
+=== Sign-up Sheets Lite ===
 Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.3
@@ -10,7 +10,7 @@ An online sign-up sheet manager where your users/volunteers can sign up for task
 
 == Description ==
 
-Sign-up Sheets allows you to have people sign up for different tasks and events that you set up. For more information, visit... http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
+Sign-up Sheets allows you to have people sign up for different tasks and events that you set up. If you are looking for additional features, check out the Pro version... http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 
 == Installation ==
 
