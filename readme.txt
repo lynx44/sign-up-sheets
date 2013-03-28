@@ -43,6 +43,9 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 
 == Upgrade Notice ==
 
+= 1.0.7 =
+* Corrected export CSV headers
+
 = 1.0.6 =
 * Security fix for sign-up form
 
@@ -65,6 +68,9 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 * Fixed bug with sites using query strings on sign-up sheet page
 
 == Changelog ==
+
+= 1.0.7 =
+* Corrected export CSV headers
 
 = 1.0.6 =
 * Security fix for sign-up form

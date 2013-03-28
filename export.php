@@ -31,7 +31,7 @@ class DLS_SUS_Export
         header("Pragma: no-cache");
         header("Expires: 0");
         
-        $csv = '"Sheet ID","Sheet Title","Sheet Date","Task ID","Task Title","Sign-up ID","Sign-up Name","Sign-up Phone","Sign-up Email"'."\n";
+        $csv = '"Sheet ID","Sheet Title","Sheet Date","Task ID","Task Title","Sign-up ID","Sign-up First Name","Sign-up Last Name","Sign-up Phone","Sign-up Email"'."\n";
         foreach ($data as $d) {
             $csv .= '"' . 
                 $this->clean_csv($d->sheet_id) . '","' . 
