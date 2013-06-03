@@ -8,9 +8,11 @@ License: GPLv2 or later
 
 An online sign-up sheet manager where your users/volunteers can sign up for tasks
 
+
 == Description ==
 
 Sign-up Sheets allows you to have people sign up for different tasks and events that you set up. If you are looking for additional features, check out the Pro version... http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
+
 
 == Installation ==
 
@@ -18,6 +20,7 @@ Sign-up Sheets allows you to have people sign up for different tasks and events 
 2. Copy the `sign-up-sheets` directory and all its files to your `/wp-content/plugins/` directory
 3. Activate the plugin through the 'Plugins' menu in WordPress
 4. Create a new blank page and add the shortcode [sign_up_sheet]
+
 
 == Frequently Asked Questions ==
 
@@ -33,6 +36,10 @@ Yes, in `Settings > Sign-up Sheets` you can specify any email you want.  It defa
 
 Send us an email through our website at http://www.dlssoftwarestudios.com/contact-us/  We appreciate any and all feedback, but can't guarantee it will make it into the next version.  If you are in need a modification immediately, we are available for hire.  Please contact us at the link above and we can provide a quote.
 
+= How do I display sheets from only 1 specific category (Pro version only) =
+
+To filter by category, you can include the category id # in the shortcode to determine which category will display on that page.   As an example, the following shortcode would show all sheets associated with category #5... `[sign_up_sheet category_id="5"]`
+
 
 == Screenshots ==
 
@@ -40,6 +47,7 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 2. Admin Sign-up Sheet Details
 3. Admin Edit Sign-up Sheet
 4. Frontend Example
+
 
 == Upgrade Notice ==
 
@@ -66,6 +74,7 @@ Send us an email through our website at http://www.dlssoftwarestudios.com/contac
 
 = 1.0.1 =
 * Fixed bug with sites using query strings on sign-up sheet page
+
 
 == Changelog ==
 
