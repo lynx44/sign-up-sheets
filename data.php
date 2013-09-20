@@ -61,7 +61,7 @@ class DLS_SUS_Data
             SELECT * 
             FROM ".$this->tables['sheet']['name']." 
             WHERE trash = ".(($trash) ? "TRUE" : "FALSE")."
-            ".(($active_only) ? " AND date >= NOW() OR date = '0000-00-00'" : "")."
+            ".(($active_only) ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-%d') OR date = '0000-00-00'" : "")."
             ORDER BY date DESC, id DESC
         ");
         $results = $this->stripslashes_full($results);
@@ -203,9 +203,12 @@ class DLS_SUS_Data
     {
         $clean_fields = $this->clean_array($fields, 'sheet_');
         $clean_fields = array_intersect_key($clean_fields, $this->tables['sheet']['allowed_fields']);
-        if (isset($clean_fields['date']) && $clean_fields['date'] != '0000-00-00') $clean_fields['date'] = date('Y-m-d', strtotime($clean_fields['date']));
+        if (isset($clean_fields['date'])) {
+            if ($clean_fields['date'] == '') $clean_fields['date'] = '0000-00-00';
+            if ($clean_fields['date'] != '0000-00-00') $clean_fields['date'] = date('Y-m-d', strtotime($clean_fields['date']));
+        }
         $result = $this->wpdb->insert($this->tables['sheet']['name'], $clean_fields);
-        if ($result === false) throw new SUS_Data_Exception('Error adding sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error adding sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -223,7 +226,7 @@ class DLS_SUS_Data
         $clean_fields['sheet_id'] = $sheet_id;
         if ($clean_fields['qty'] < 2) $clean_fields['qty'] = 1;
         $result = $this->wpdb->insert($this->tables['task']['name'], $clean_fields);
-        if ($result === false) throw new SUS_Data_Exception('Error adding task.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error adding task.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -244,12 +247,12 @@ class DLS_SUS_Data
         $task = $this->get_task($task_id);
         $signups = $this->get_signups($task_id);
         if (count($signups) >= $task->qty) {
-            throw new SUS_Data_Exception('Error adding signup.  All spots are filled.'. (($this->detailed_errors === true) ? ' Current Signups: '.count($signups).', Total Spots:'.$task->qty : ''));
+            throw new DLS_SUS_Data_Exception('Error adding signup.  All spots are filled.'. (($this->detailed_errors === true) ? ' Current Signups: '.count($signups).', Total Spots:'.$task->qty : ''));
             return false;
         }
         
         $result = $this->wpdb->insert($this->tables['signup']['name'], $clean_fields);
-        if ($result === false) throw new SUS_Data_Exception('Error adding signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error adding signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -264,9 +267,12 @@ class DLS_SUS_Data
     {
         $clean_fields = $this->clean_array($fields, 'sheet_');
         $clean_fields = array_intersect_key($clean_fields, $this->tables['sheet']['allowed_fields']);
-        if (isset($clean_fields['date']) && $clean_fields['date'] != '0000-00-00') $clean_fields['date'] = date('Y-m-d', strtotime($clean_fields['date']));
+        if (isset($clean_fields['date'])) {
+            if ($clean_fields['date'] == '') $clean_fields['date'] = '0000-00-00';
+            if ($clean_fields['date'] != '0000-00-00') $clean_fields['date'] = date('Y-m-d', strtotime($clean_fields['date']));
+        }
         $result = $this->wpdb->update($this->tables['sheet']['name'], $clean_fields, array('id' => $id), null, array('%d'));
-        if ($result === false) throw new SUS_Data_Exception('Error updating sheet.'. (($this->detailed_errors === true) ? '... '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error updating sheet.'. (($this->detailed_errors === true) ? '... '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -279,11 +285,18 @@ class DLS_SUS_Data
      */
     public function update_task($fields, $id)
     {
+        // Clean Data
         $clean_fields = $this->clean_array($fields, 'task_');
         $clean_fields = array_intersect_key($clean_fields, $this->tables['task']['allowed_fields']);
         if ($clean_fields['qty'] < 2) $clean_fields['qty'] = 1;
+        
+        // Error Handling
+        $signup_count = count($this->get_signups($id));
+        if ($signup_count > $clean_fields['qty']) throw new DLS_SUS_Data_Exception('Could not update the number of people needed on task "'.$clean_fields['title'].'" to be "'.$clean_fields['qty'].'" because the number of signups is already "'.$signup_count.'".  You will need to clear spots before adjusting this number.');
+        
+        // Process
         $result = $this->wpdb->update($this->tables['task']['name'], $clean_fields, array('id' => $id), null, array('%d'));
-        if ($result === false) throw new SUS_Data_Exception('Error updating task.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error updating task.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -298,18 +311,18 @@ class DLS_SUS_Data
         foreach ($tasks AS $task) {
             // Delete Signups
             if ($this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['signup']['name']." WHERE task_id = %d" , $task->id)) === false) {
-                throw new SUS_Data_Exception('Error deleting signups from task #'.$task->id.' on sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+                throw new DLS_SUS_Data_Exception('Error deleting signups from task #'.$task->id.' on sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
                 return false;
             }
         }
         // Delete Tasks
         if ($this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['task']['name']." WHERE sheet_id = %d" , $id)) === false) {
-            throw new SUS_Data_Exception('Error deleting tasks on sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+            throw new DLS_SUS_Data_Exception('Error deleting tasks on sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
             return false;
         }
         // Delete Sheet
         if ($this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['sheet']['name']." WHERE id = %d" , $id)) === false) {
-            throw new SUS_Data_Exception('Error deleting sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+            throw new DLS_SUS_Data_Exception('Error deleting sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
             return false;
         }
         return true;
@@ -323,7 +336,7 @@ class DLS_SUS_Data
     public function delete_task($id)
     {
         $result = $this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['task']['name']." WHERE id = %d" , $id));
-        if ($result === false) throw new SUS_Data_Exception('Error deleting task.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error deleting task.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -335,7 +348,7 @@ class DLS_SUS_Data
     public function delete_signup($id)
     {
         $result = $this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['signup']['name']." WHERE id = %d" , $id));
-        if ($result === false) throw new SUS_Data_Exception('Error deleting signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error deleting signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
     
@@ -415,4 +428,4 @@ class DLS_SUS_Data
 /**
  * Data Exception Class
  */
-class SUS_Data_Exception extends Exception{}
+class DLS_SUS_Data_Exception extends Exception{}

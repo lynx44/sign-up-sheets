@@ -14,6 +14,10 @@ class DLS_SUS_Export
     
     public function __construct()
     {
+        if (!current_user_can('manage_signup_sheets'))  {
+            wp_die(__('You do not have sufficient permissions to access this page.'));
+        }
+        
         global $wpdb;
         $this->wpdb = $wpdb;
         $this->data = new DLS_SUS_Data();

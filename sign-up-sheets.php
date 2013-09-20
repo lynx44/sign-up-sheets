@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets Lite
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.7
+Version: 1.0.8
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -42,6 +42,7 @@ class DLS_Sign_Up_Sheet
     public $db_version = '1.0';
     private $wp_roles;
     public $detailed_errors = false;
+    public $go_pro = '<div style="float: right; padding: .6em; text-align: center;" id="dls-sus-go-pro"><a class="button-primary" href="http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/" target="_blank">Upgrade to <strong>Sign-up Sheets Pro</strong></a><br><a href="http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/" style="font-size: 0.9em;" target="_blank">Learn more and compare versions</a></div>';
     
     public function __construct()
     {
@@ -65,22 +66,23 @@ class DLS_Sign_Up_Sheet
         add_shortcode('sign_up_sheet', array(&$this, 'display_sheet'));
         register_activation_hook(__FILE__, array(&$this, 'activate'));
         register_deactivation_hook( __FILE__, array(&$this, 'deactivate'));
-        
+
+        add_action('admin_head', array(&$this, 'admin_head'));
         if (isset($_GET['page']) && (strpos($_GET['page'], $this->plugin_prefix)) !== false) {
-            add_action('admin_head', array(&$this, 'admin_head'));
             add_action('admin_footer', array(&$this, 'admin_footer'));
         }
         add_action('wp_enqueue_scripts', array(&$this, 'add_css_and_js_to_frontend'));
         add_action('admin_enqueue_scripts', array(&$this, 'add_scripts_to_admin'));
         add_action('admin_menu', array(&$this, 'admin_menu'));
         add_filter("plugin_action_links_$plugin", array(&$this, 'admin_settings_link'));
+        add_filter('admin_footer_text', array($this, 'admin_footer_text'), 100);
     }
     
     /**
      * Output the volunteer signup form
      * 
-     * @param   array   attributes from shortcode call
-     * @todo    improve captcha
+     * @param array $atts attributes from shortcode call
+     * @return string
      */
     function display_sheet($atts)
     {
@@ -172,7 +174,7 @@ class DLS_Sign_Up_Sheet
                             $success = true;
                             $return .= '<p class="dls-sus updated">'.__('You have been signed up!').'</p>';
                             if ($this->send_mail($_POST['signup_email'], $_GET['task_id']) === false) $return .= 'ERROR SENDING EMAIL';
-                        } catch (SUS_Data_Exception $e) {
+                        } catch (DLS_SUS_Data_Exception $e) {
                             $err++;
                             $return .= '<p class="dls-sus error">'.__($e->getMessage()).'</p>';
                         }
@@ -191,7 +193,7 @@ class DLS_Sign_Up_Sheet
 			    // Sheet Details
 			    if (!$submitted || $success || $err) {
 	                $return .= '
-                        '.(($sheet->date) ? '<p>Date: '.date(get_option('date_format'), strtotime($sheet->date)).'</p>' : '' ).'
+                        '.(($sheet->date && $sheet->date != '0000-00-00') ? '<p>Date: '.date(get_option('date_format'), strtotime($sheet->date)).'</p>' : '' ).'
 	                    <p>'.$sheet->details.'</p>
 	                    <h3>Sign up below...</h3>
 	                ';
@@ -249,6 +251,12 @@ class DLS_Sign_Up_Sheet
         return $return;
     }
 
+    /**
+     * Display signup form
+     *
+     * @param int $task_id
+     * @return string
+     */
 	public function display_signup_form($task_id)
 	{	
         $task = $this->data->get_task($task_id);
@@ -289,8 +297,8 @@ class DLS_Sign_Up_Sheet
 	}
         
     /**
-    * Admin Menu
-    */
+     * Admin Menu
+     */
     public function admin_menu()
     {
         add_options_page('Sign-up Sheets Settings', 'Sign-up Sheets', 'manage_options', $this->admin_settings_slug, array(&$this, 'admin_options'));
@@ -302,8 +310,8 @@ class DLS_Sign_Up_Sheet
     }
 
     /**
-    * Admin Page: Options/Settings
-    */
+     * Admin Page: Options/Settings
+     */
     function admin_options()
     {
         if (!current_user_can('manage_options') && !current_user_can('manage_signup_sheets'))  {
@@ -320,6 +328,8 @@ class DLS_Sign_Up_Sheet
         
         echo '
             <div class="wrap dls_sus">
+                <div id="icon-dls-sus" class="icon32"><br /></div>
+                '.$this->go_pro.'
                 <h2>' . __( 'Sign-up Sheets Settings', 'dls-sus-menu' ) . '</h2>
                 <form name="form1" method="post" action="">
                     ';
@@ -387,9 +397,10 @@ class DLS_Sign_Up_Sheet
     }
 
     /**
-    * Admin Page: Sheets
-    */
-    function admin_sheet_page() {
+     * Admin Page: Sheets
+     */
+    function admin_sheet_page()
+    {
         if (!current_user_can('manage_options') && !current_user_can('manage_signup_sheets'))  {
             wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
         }
@@ -403,7 +414,7 @@ class DLS_Sign_Up_Sheet
                 $result = $this->data->delete_signup($_GET['signup_id']);
                 $success = true;
                 if ($result > 0) echo '<div class="updated"><p>Spot has been cleared.</p></div>';
-            } catch (SUS_Data_Exception $e) {
+            } catch (DLS_SUS_Data_Exception $e) {
                 $err = true;
                 echo '<div class="error"><p>Error clearing spot (ID #'.esc_attr($_GET['signup_id']).')</p></div>';
             }
@@ -418,6 +429,8 @@ class DLS_Sign_Up_Sheet
         $edit = (!$trash && !$untrash && !$delete && !$copy && !empty($_GET['sheet_id']));
         
         echo '<div class="wrap dls_sus">';
+        echo '<div id="icon-dls-sus" class="icon32"><br /></div>';
+        echo $this->go_pro;
         echo ($edit || $view_signups) ? '<h2>Sheet Details</h2>' : '<h2>Sign-up Sheets 
             <a href="?page='.$this->admin_settings_slug.'_modify_sheet" class="add-new-h2">Add New</a>
             <a href="'.plugins_url( './' , __FILE__ ).'export.php" class="add-new-h2">Export All as CSV</a>
@@ -428,28 +441,28 @@ class DLS_Sign_Up_Sheet
             try {
                 $result = $this->data->update_sheet(array('sheet_trash'=>false), $_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been restored.</p></div>';
-            } catch (SUS_Data_Exception $e) {
+            } catch (DLS_SUS_Data_Exception $e) {
                 echo '<div class="error"><p>Error restoring sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         } elseif ($trash) {
             try {
                 $result = $this->data->update_sheet(array('sheet_trash'=>true), $_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been moved to trash.</p></div>';
-            } catch (SUS_Data_Exception $e) {
+            } catch (DLS_SUS_Data_Exception $e) {
                 echo '<div class="error"><p>Error moving sheet to trash.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         } elseif ($delete) {
             try {
                 $result = $this->data->delete_sheet($_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been permanently deleted.</p></div>';
-            } catch (SUS_Data_Exception $e) {
+            } catch (DLS_SUS_Data_Exception $e) {
                 echo '<div class="error"><p>Error permanently deleting sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         } elseif ($copy) {
             try {
                 $new_id = $this->data->copy_sheet($_GET['sheet_id']);
                 echo '<div class="updated"><p>Sheet has been copied to new sheet ID #'.$new_id.' (<a href="?page='.$this->admin_settings_slug.'_modify_sheet&amp;sheet_id='.$new_id.'">Edit</a>).</p></div>';
-            } catch (SUS_Data_Exception $e) {
+            } catch (DLS_SUS_Data_Exception $e) {
                 echo '<div class="error"><p>Error copying sheet.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : '').'</p></div>';
             }
         }
@@ -482,6 +495,7 @@ class DLS_Sign_Up_Sheet
                                     <th>Name</th>
                                     <th>E-mail</th>
                                     <th>Phone</th>
+                                    <th>Reminded *</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -501,6 +515,7 @@ class DLS_Sign_Up_Sheet
                                                     <td>#'.$i.': <em>'.$signup->firstname.' '.$signup->lastname.'</em>
                                                     <td>'.$signup->email.'</td>
                                                     <td>'.$signup->phone.'</td>
+                                                    <td>&nbsp;</td>
                                                     <td><span class="delete"><a href="?page='.$this->admin_settings_slug.'_sheets&amp;sheet_id='.$_GET['sheet_id'].'&amp;signup_id='.$signup->id.'&amp;action=clear">Clear Spot</a></span></td>
                                                 </tr>
                                             ';
@@ -511,7 +526,7 @@ class DLS_Sign_Up_Sheet
                                             echo '
                                                 <tr>
                                                     <td>'.(($i === 1) ? $task->title : '' ).'</td>
-                                                    <td colspan="4">#'.$i.': (empty)</td>
+                                                    <td colspan="5">#'.$i.': (empty)</td>
                                                 </tr>
                                             ';
                                         }
@@ -524,6 +539,7 @@ class DLS_Sign_Up_Sheet
                             echo '
                             </tbody>
                         </table>
+                        <p>* Reminders are only available with <a href="https://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/">Sign-up Sheets Pro</a>.</p>
                     ';
                 }
                 
@@ -556,9 +572,10 @@ class DLS_Sign_Up_Sheet
     }
 
     /**
-    * Admin Page: Add a Sheet Page
-    */
-    function admin_modify_sheet_page() {
+     * Admin Page: Add a Sheet Page
+     */
+    function admin_modify_sheet_page()
+    {
         if (!current_user_can('manage_options') && !current_user_can('manage_signup_sheets'))  {
             wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
         }
@@ -648,7 +665,7 @@ class DLS_Sign_Up_Sheet
                     }
                 }
                 
-            } catch (SUS_Data_Exception $e) {
+            } catch (DLS_SUS_Data_Exception $e) {
                 $err++;
                 echo '<div class="error"><p><strong>'.__($e->getMessage()).'</strong></p></div>';
             }
@@ -675,16 +692,19 @@ class DLS_Sign_Up_Sheet
         }
         
         // Display Form
-        echo '<div class="wrap dls_sus"><h2>'.(($add) ? 'Add' : 'Edit').' Sign-up Sheet</h2>';
+        echo '<div class="wrap dls_sus">';
+        echo '<div id="icon-dls-sus" class="icon32"><br /></div>';
+        echo $this->go_pro;
+        echo '<h2>'.(($add) ? 'Add' : 'Edit').' Sign-up Sheet</h2>';
         $this->display_sheet_form($fields);
         echo '</div><!-- .wrap -->';
     }
     
     /**
-    * Display the form to add/edit a sheet
-    * 
-    * @param    array   fields to pass into form, if any
-    */
+     * Display the form to add/edit a sheet
+     * 
+     * @param    array   fields to pass into form, if any
+     */
     private function display_sheet_form($f=array())
     {
         $count = (isset($f['task_title'])) ? count($f['task_title']) : 3;
@@ -697,7 +717,7 @@ class DLS_Sign_Up_Sheet
                     <input type="text" id="sheet_title" name="sheet_title" value="'.((isset($f['sheet_title']) ? esc_attr($f['sheet_title']) : '')).'" size="60">
                     
                     <label for="sheet_date">Date:</label>
-                    <input type="text" id="sheet_date" name="sheet_date" value="'.((isset($f['sheet_date']) ? date('m/d/Y', strtotime($f['sheet_date'])) : '')).'" size="20" class="dls-sus-datepicker">
+                    <input type="text" id="sheet_date" name="sheet_date" value="'.((isset($f['sheet_date']) && $f['sheet_date'] != '0000-00-00') ? date('m/d/Y', strtotime($f['sheet_date'])) : '').'" size="20" class="dls-sus-datepicker">
                 </p>
                 <p>
                     <label for="sheet_details">Details:</label><br />
@@ -731,12 +751,12 @@ class DLS_Sign_Up_Sheet
     }
     
     /**
-    * Send email when user signs up
-    * 
-    * @param    string  the email to send the message to
-    * @return   bool
-    * @todo     add error catching for wp_mail
-    */
+     * Send email when user signs up
+     * 
+     * @param    string  $to the email to send the message to
+     * @param    int     $task_id
+     * @return   bool
+     */
     public function send_mail($to, $task_id)
     {
         $task = $this->data->get_task($task_id);
@@ -768,10 +788,11 @@ class DLS_Sign_Up_Sheet
     }
     
     /**
-    * Add settings link on plugin page
-    * 
-    * @param mixed $links
-    */
+     * Add settings link on plugin page
+     * 
+     * @param string $links
+     * @return string
+     */
     function admin_settings_link($links)
     { 
         $settings_link = '<a href="options-general.php?page='.$this->admin_settings_slug.'">Settings</a>'; 
@@ -780,49 +801,35 @@ class DLS_Sign_Up_Sheet
     }
     
     /**
-    * Enqueue plugin css and js files
-    */
-    function add_css_and_js_to_frontend() {
+     * Enqueue plugin css and js files
+     */
+    function add_css_and_js_to_frontend()
+    {
         wp_register_style('dls-sus-style', plugins_url('css/style.css', __FILE__));
         wp_enqueue_style('dls-sus-style');
     }
     
     /**
-    * Enqueue plugin's admin scripts
-    */
-    function add_scripts_to_admin() {
+     * Enqueue plugin's admin scripts
+     */
+    function add_scripts_to_admin()
+    {
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_style( 'jquery.ui.theme', plugins_url( '/css/smoothness/jquery.ui.datepicker.css', __FILE__ ) );
     }
     
     /**
-    * Enqueue plugin css and js files
-    */
-    function admin_head() {
+     * Enqueue plugin css and js files
+     */
+    function admin_head()
+    {
+        wp_enqueue_style('dls-sus-admin', plugins_url('css/admin.css', __FILE__));
+        
         echo '
             <style type="text/css">
-                .dls_sus .fixed .column-task_num,
-                .dls_sus .fixed .column-spot_num,
-                .dls_sus .fixed .column-filled_spot_num {
-                    width: 10%;
-                    }
-                .dls_sus .fixed .column-id {
-                    width: 5%;
-                    }
-                .dls_sus .tasks LI {
-                    background: transparent url("'.plugins_url('images/icon-drag-y.png',__FILE__).'") no-repeat scroll left center;
-                    padding-left: 16px;
-                    min-height: 20px;
-                    }
-                .dls_sus .tasks LI:hover {
-                    cursor: move;
-                    }
-                .dls_sus .tasks LI.ui-sortable-helper{
-                    cursor: move;
-                    }
                 ';
-                
+
                 // Remove spacing if no bulk actions
                 if (count(DLS_SUS_List_Table::get_bulk_actions()) === 0) {
                     echo '
@@ -840,8 +847,8 @@ class DLS_Sign_Up_Sheet
     }
     
     /**
-    * Add to admin footer
-    */
+     * Add to admin footer
+     */
     public function admin_footer()
     {
         
@@ -888,10 +895,28 @@ class DLS_Sign_Up_Sheet
         <?php
         
     }
+
+    /**
+     * Override WordPress Footer
+     *
+     * @param string $admin_footer_text
+     * @return string
+     */
+    public function admin_footer_text($admin_footer_text)
+    {
+        if (isset($_REQUEST['page']) && strpos($_REQUEST['page'], 'dls-sus-') === 0) {
+            $admin_footer_text = '
+                <a href="' . __('https://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/', 'dls-sus') . '" id="dls-sus-footer-logo" title="' . __('DLS Software Studios', 'dls-sus') . '" target="_blank">' . __('DLS Software Studios', 'dls-sus' ) . '</a>
+                <span>' . sprintf(__('<a href="%s" target="_blank">Get Sign-up Sheets Pro &raquo;</a>', 'dls-sus' ), __( 'https://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/', 'dls-sus')) . '</span>
+            ';
+        }
+
+        return $admin_footer_text;
+    }
     
     /**
-    * Activate the plugin
-    */
+     * Activate the plugin
+     */
     public function activate()
     {
         // Database Tables
@@ -939,8 +964,8 @@ class DLS_Sign_Up_Sheet
     }
     
     /**
-    * Deactivate the plugin
-    */
+     * Deactivate the plugin
+     */
     public function deactivate()
     {
         // Remove custom role and capability

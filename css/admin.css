@@ -1,0 +1,53 @@
+#toplevel_page_dls-sus-settings_sheets .wp-menu-image {
+    background-size: 16px 32px;
+    background: url('../images/admin-icon.png') no-repeat top center !important;
+    }
+#toplevel_page_dls-sus-settings_sheets.opensub .wp-menu-image,
+#toplevel_page_dls-sus-settings_sheets A:hover .wp-menu-image,
+#toplevel_page_dls-sus-settings_sheets:focus .wp-menu-image,
+#toplevel_page_dls-sus-settings_sheets.wp-menu-open .wp-menu-image {
+    background-position: bottom center !important;
+    }
+#toplevel_page_dls-sus-settings_sheets .wp-menu-image IMG {
+    display: none;
+    }
+#icon-dls-sus {
+    background-image: url('../images/workarea-icon.png');
+    }
+.dls_sus .fixed .column-task_num,
+.dls_sus .fixed .column-spot_num,
+.dls_sus .fixed .column-filled_spot_num {
+    width: 10%;
+    }
+.dls_sus .fixed .column-id {
+    width: 5%;
+    }
+.dls_sus .tasks LI {
+    background: transparent url('../images/icon-drag-y.png') no-repeat scroll left center;
+    padding-left: 16px;
+    min-height: 20px;
+    }
+.dls_sus .tasks LI:hover {
+    cursor: move;
+    }
+.dls_sus .tasks LI.ui-sortable-helper{
+    cursor: move;
+    }
+.dls-sus-pro {
+    background-color: #47c9af;
+    color: #fff;
+    font-size: .4em;
+    font-weight: bold;
+    padding: .2em .6em;
+    -webkit-border-radius: 1em;
+    border-radius: 1em;
+    }
+#dls-sus-footer-logo {
+    background: transparent url('../images/dss-logo.png');
+    display: inline-block;
+    height: 42px;
+    width: 179px;
+    text-indent: -99999999px;
+    vertical-align: middle;
+    margin-right: 1em;
+    }

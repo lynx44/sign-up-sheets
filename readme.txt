@@ -51,6 +51,12 @@ To filter by category, you can include the category id # in the shortcode to det
 
 == Upgrade Notice ==
 
+= 1.0.8 =
+* Fixed security bug on export
+* Fixed sheet edit screen to prevent the quantity of available tasks from being decreased below the number of current signups
+* Fixed sheets disappearing before the end of day on date of event
+* Fixed bug that disallowed leaving the date field blank
+
 = 1.0.7 =
 * Corrected export CSV headers
 
@@ -77,6 +83,10 @@ To filter by category, you can include the category id # in the shortcode to det
 
 
 == Changelog ==
+
+= 1.0.8 =
+* Fixed security bug on export
+* Fixed sheet edit screen to prevent the quantity of available tasks from being decreased below the number of current signups
 
 = 1.0.7 =
 * Corrected export CSV headers
