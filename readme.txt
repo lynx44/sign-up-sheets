@@ -25,19 +25,15 @@ Sign-up Sheets allows you to have people sign up for different tasks and events 
 == Frequently Asked Questions ==
 
 = How do I create a Sign-up Sheet page on my site? =
-
 You can do this by creating any page or post and adding the shortcode `[sign_up_sheet]` to the content.  Then, go to the "Sign-up Sheets" section of your WP admin and create a new sheet.
 
 = Can I change the "from" address on the confirmation email? =
-
 Yes, in `Settings > Sign-up Sheets` you can specify any email you want.  It defaults to the email address set in `Settings > General`.
 
 = How can I suggest an idea for the plugin? =
-
 Send us an email through our website at http://www.dlssoftwarestudios.com/contact-us/  We appreciate any and all feedback, but can't guarantee it will make it into the next version.  If you are in need a modification immediately, we are available for hire.  Please contact us at the link above and we can provide a quote.
 
 = How do I display sheets from only 1 specific category (Pro version only) =
-
 To filter by category, you can include the category id # in the shortcode to determine which category will display on that page.   As an example, the following shortcode would show all sheets associated with category #5... `[sign_up_sheet category_id="5"]`
 
 
@@ -50,6 +46,11 @@ To filter by category, you can include the category id # in the shortcode to det
 
 
 == Upgrade Notice ==
+
+= 1.0.9 =
+* Fixed bug where trashed sheets with no date specified would display on frontend
+* fixed bug where trashed individual sheet pages were available on the frontend
+* Removed debug statement that was causing issues in certain browsers
 
 = 1.0.8 =
 * Fixed security bug on export
@@ -83,6 +84,11 @@ To filter by category, you can include the category id # in the shortcode to det
 
 
 == Changelog ==
+
+= 1.0.9 =
+* Fixed bug where trashed sheets with no date specified would display on frontend
+* Fixed bug where trashed individual sheet pages were available on the frontend
+* Removed debug statement that was causing issues in certain browsers
 
 = 1.0.8 =
 * Fixed security bug on export

@@ -61,7 +61,7 @@ class DLS_SUS_Data
             SELECT * 
             FROM ".$this->tables['sheet']['name']." 
             WHERE trash = ".(($trash) ? "TRUE" : "FALSE")."
-            ".(($active_only) ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-%d') OR date = '0000-00-00'" : "")."
+            ".(($active_only) ? " AND (date >= DATE_FORMAT(NOW(), '%Y-%m-%d') OR date = '0000-00-00')" : "")."
             ORDER BY date DESC, id DESC
         ");
         $results = $this->stripslashes_full($results);

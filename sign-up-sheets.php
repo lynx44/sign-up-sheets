@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets Lite
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.8
+Version: 1.0.9
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -134,9 +134,9 @@ class DLS_Sign_Up_Sheet
         } else {
             
             // Display Individual Sheet
-            if (($sheet = $this->data->get_sheet($id)) === false) {
+            if (($sheet = $this->data->get_sheet($id)) === false || !empty($sheet->trash)) {
                 $return .= '<p>Sign-up sheet not found.</p>';
-                return false;
+                return $return;
             } else {
                 
                 $return .= '
@@ -855,8 +855,7 @@ class DLS_Sign_Up_Sheet
         ?>
         <script type="text/javascript">
         (function($) {    
-            $(document).ready(function(){ 
-                console.log('a');//debug
+            $(document).ready(function(){
                 if ($('.tasks LI').is('*')) {
                     var last_css_id = $(".tasks LI").last().attr('id');
                     var row_key = last_css_id.substr(last_css_id.indexOf("-") + 1);
