@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Sign-up Sheets Lite
+Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
 Version: 1.0.9

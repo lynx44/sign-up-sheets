@@ -1,4 +1,4 @@
-=== Sign-up Sheets Lite ===
+=== Sign-up Sheets ===
 Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.3
