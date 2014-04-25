@@ -2,7 +2,7 @@
 Contributors: dlsstudios
 Tags: volunteer, signup, sign up
 Requires at least: 3.3
-Tested up to: 3.5
+Tested up to: 3.9
 Stable tag: 1.0.6
 License: GPLv2 or later
 
