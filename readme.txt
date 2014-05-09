@@ -12,12 +12,14 @@ An online sign-up sheet manager where your users/volunteers can sign up for task
 == Description ==
 
 This plugin lets you quickly and easily setup sign-up sheets on your WordPress site.  Sign-up Sheets can be used for many purposes:
+
 * Volunteer sign-ups
 * Timeslot sign-ups
 * Personell and resource coordination
 * And many more...
 
 Sign-up sheets is being used on 1000s of WordPress websites and for dozens of functions including:
+
 * Non-profits volunteer opportunities
 * Schools and PTO volunteer opportunities
 * Church volunteer opportunities
@@ -27,6 +29,7 @@ Sign-up sheets is being used on 1000s of WordPress websites and for dozens of fu
 * And Many more...
 
 The basic version of Sign-Up Sheets includes the following features:
+
 * Unlimited number of sign-up sheets and unlimited number of sign-up slots
 * Administrator can clear sign-up slots if needed
 * Ability to copy a sheet
