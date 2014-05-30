@@ -11,12 +11,24 @@ An online sign-up sheet manager where your users/volunteers can sign up for task
 
 == Description ==
 
-This plugin lets you quickly and easily setup sign-up sheets on your WordPress site.  Sign-up Sheets can be used for many purposes:
+This plugin lets you quickly and easily setup sign-up sheets on your WordPress site.
+
+For many more features, check out Sign-up Sheets Pro here:
+[http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/](http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/)
+
+Sign-up Sheets can be used for many purposes:
 
 * Volunteer sign-ups
 * Timeslot sign-ups
 * Personell and resource coordination
 * And many more...
+
+The basic version of Sign-Up Sheets includes the following features:
+
+* Unlimited number of sign-up sheets and unlimited number of sign-up slots
+* Administrator can clear sign-up slots if needed
+* Ability to copy a sheet
+* Export all sign-up information to CSV
 
 Sign-up sheets is being used on 1000s of WordPress websites and for dozens of functions including:
 
@@ -26,17 +38,7 @@ Sign-up sheets is being used on 1000s of WordPress websites and for dozens of fu
 * Club volunteer opportunities
 * Photographer timeslot sign-ups
 * Meeting room timeslot sign-ups
-* And Many more...
-
-The basic version of Sign-Up Sheets includes the following features:
-
-* Unlimited number of sign-up sheets and unlimited number of sign-up slots
-* Administrator can clear sign-up slots if needed
-* Ability to copy a sheet
-* Export all sign-up information to CSV
-
-For many more features, check out Sign-up Sheets Pro here:
-[http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/](http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/)
+* And many more...
 
 
 == Installation ==
@@ -71,6 +73,10 @@ To filter by category, you can include the category id # in the shortcode to det
 
 
 == Upgrade Notice ==
+
+= 1.0.10 =
+* Fixed bug where trashed sheets were showing up on Export All
+* Fixed fatal error if activating Pro before deactivating the free version
 
 = 1.0.9 =
 * Fixed bug where trashed sheets with no date specified would display on frontend
@@ -109,6 +115,10 @@ To filter by category, you can include the category id # in the shortcode to det
 
 
 == Changelog ==
+
+= 1.0.10 =
+* Fixed bug where trashed sheets were showing up on Export All
+* Fixed fatal error if activating Pro before deactivating the free version
 
 = 1.0.9 =
 * Fixed bug where trashed sheets with no date specified would display on frontend

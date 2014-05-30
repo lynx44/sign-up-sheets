@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.9
+Version: 1.0.10
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -28,6 +28,8 @@ License: GPL2
 if (!class_exists('DLS_SUS_Data')) require_once 'data.php';
 if (!class_exists('DLS_SUS_List_Table')) require_once 'list-table.php';
 
+if (!class_exists('DLS_Sign_Up_Sheet')):
+
 class DLS_Sign_Up_Sheet
 {
 	
@@ -42,7 +44,7 @@ class DLS_Sign_Up_Sheet
     public $db_version = '1.0';
     private $wp_roles;
     public $detailed_errors = false;
-    public $go_pro = '<div style="float: right; padding: .6em; text-align: center;" id="dls-sus-go-pro"><a class="button-primary" href="http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/" target="_blank">Upgrade to <strong>Sign-up Sheets Pro</strong></a><br><a href="http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/" style="font-size: 0.9em;" target="_blank">Learn more and compare versions</a></div>';
+    public $go_pro = '<div style="float: right; padding: .6em; text-align: center;" id="dls-sus-go-pro"><a class="button-primary" href="http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/" target="_blank">Upgrade to <strong>Sign-up Sheets Pro</strong></a></div>';
     
     public function __construct()
     {
@@ -74,6 +76,7 @@ class DLS_Sign_Up_Sheet
         add_action('wp_enqueue_scripts', array(&$this, 'add_css_and_js_to_frontend'));
         add_action('admin_enqueue_scripts', array(&$this, 'add_scripts_to_admin'));
         add_action('admin_menu', array(&$this, 'admin_menu'));
+        add_action('admin_init', array(&$this, 'dup_plugin_check'));
         add_filter("plugin_action_links_$plugin", array(&$this, 'admin_settings_link'));
         add_filter('admin_footer_text', array($this, 'admin_footer_text'), 100);
     }
@@ -304,7 +307,7 @@ class DLS_Sign_Up_Sheet
         add_options_page('Sign-up Sheets Settings', 'Sign-up Sheets', 'manage_options', $this->admin_settings_slug, array(&$this, 'admin_options'));
 
         // Utility Menu
-        add_utility_page('Sign-up Sheets', 'Sign-up Sheets', 'manage_signup_sheets', $this->admin_settings_slug.'_sheets', array(&$this, 'admin_sheet_page'));
+        add_utility_page('Sign-up Sheets', 'Sign-up Sheets', 'manage_signup_sheets', $this->admin_settings_slug.'_sheets', array(&$this, 'admin_sheet_page'), plugins_url( '/images/admin-icon.png', __FILE__ ));
         add_submenu_page($this->admin_settings_slug.'_sheets', 'Sign-up Sheets ', 'All Sheets', 'manage_signup_sheets', $this->admin_settings_slug.'_sheets', array(&$this, 'admin_sheet_page'));
         add_submenu_page($this->admin_settings_slug.'_sheets', 'Add New Sheet', 'Add New', 'manage_signup_sheets', $this->admin_settings_slug.'_modify_sheet', array(&$this, 'admin_modify_sheet_page'));
     }
@@ -733,8 +736,8 @@ class DLS_Sign_Up_Sheet
                             <input type="text" name="task_title['.$i.']" value="'.((isset($f['task_title'][$i]) ? esc_attr($f['task_title'][$i]) : '')).'" size="20">&nbsp;&nbsp;&nbsp;
                             # of People Needed: <input type="text" name="task_qty['.$i.']" value="'.((isset($f['task_qty'][$i]) ? $f['task_qty'][$i] : '')).'" size="5">
                             <input type="hidden" name="task_id['.$i.']" value="'.((isset($f['task_id'][$i]) ? $f['task_id'][$i] : '')).'">
-                            <a href="#" class="add-task-after">(+)</a>
-                            <a href="#" class="remove-task">(-)</a>
+                            <a href="#" class="add-task-after">+</a>
+                            <a href="#" class="remove-task">-</a>
                         </li>
                     ';
                 }
@@ -865,8 +868,8 @@ class DLS_Sign_Up_Sheet
                             '<input type="text" name="task_title[' + row_key + ']" value="" size="20">&nbsp;&nbsp;&nbsp;' +
                             ' # of People Needed: <input type="text" name="task_qty[' + row_key + ']" value="" size="5">' +
                             ' <input type="hidden" name="task_id[' + row_key + ']" value="">' +
-                            ' <a href="#" class="add-task-after">(+)</a>' +
-                            ' <a href="#" class="remove-task">(-)</a>' +
+                            ' <a href="#" class="add-task-after">+</a>' +
+                            ' <a href="#" class="remove-task">-</a>' +
                         '</li>';
                         $(this).parent("LI").after(new_row);
                         return false;
@@ -911,6 +914,29 @@ class DLS_Sign_Up_Sheet
         }
 
         return $admin_footer_text;
+    }
+
+    /**
+     * Duplicate plugin check
+     */
+    public function dup_plugin_check()
+    {
+        if (is_plugin_active('sign-up-sheets-pro/sign-up-sheets.php')) {
+            deactivate_plugins(plugin_basename(__FILE__));
+            add_action('admin_notices', array($this, 'dup_plugin_admin_notice'));
+        }
+    }
+
+    /**
+     * Duplicate plugin admin notice
+     */
+    function dup_plugin_admin_notice()
+    {
+        echo '
+            <div id="'.$this->plugin_prefix.'-dup-plugin" class="error">
+                <p>More than one Sign-up Sheets plugin was found.  Please only activate one at a time.</p>
+            </div>
+        ';
     }
     
     /**
@@ -983,3 +1009,5 @@ class DLS_Sign_Up_Sheet
 }
 
 $dls_sus = new DLS_Sign_Up_Sheet();
+
+endif;

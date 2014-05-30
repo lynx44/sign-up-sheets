@@ -135,10 +135,12 @@ class DLS_SUS_Data
     
     /**
      * Get all data
-     * 
-     * @return    mixed    array of siginups
+     *
+     * @param   int|null    $sheet_id
+     * @param   bool        $trash
+     * @return  mixed       array of signups
      */
-    public function get_all_data()
+    public function get_all_data($sheet_id=null, $trash=false)
     {
         $results = $this->wpdb->get_results("
             SELECT
@@ -159,6 +161,7 @@ class DLS_SUS_Data
             FROM  ".$this->tables['sheet']['name']." sheet
             LEFT JOIN ".$this->tables['task']['name']." task ON sheet.id = task.sheet_id
             LEFT JOIN ".$this->tables['signup']['name']." signup ON task.id = signup.task_id
+            AND sheet.trash = ".(($trash) ? "TRUE" : "FALSE")."
         ");
         $results = $this->stripslashes_full($results);
         return $results;
