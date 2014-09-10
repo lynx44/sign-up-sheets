@@ -2,7 +2,7 @@
 Contributors: dlsstudios
 Tags: sign up, signup, volunteer, PTO, timeslot, photographer, Non-profit, club, sign-up, signup sheet, sign-up sheet, sign up sheet
 Requires at least: 3.3
-Tested up to: 3.9.1
+Tested up to: 4.0
 Stable tag: 1.0.6
 License: GPLv2 or later
 
