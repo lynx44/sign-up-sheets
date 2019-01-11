@@ -302,7 +302,7 @@ class DLS_SUS_Data
         if ($result === false) throw new DLS_SUS_Data_Exception('Error adding signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
 
 	    $default_fieldspec_fields = $this->get_default_fieldspec_fields($all_clean_fields, $signup_id);
-	    echo("$default_fieldspec_fields");
+
         foreach($default_fieldspec_fields as $row_data) {
 	        $result = $this->wpdb->insert($this->tables['signup_field']['name'], $row_data);
         }
@@ -429,6 +429,8 @@ class DLS_SUS_Data
     public function delete_signup($id)
     {
         $result = $this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['signup']['name']." WHERE id = %d" , $id));
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error deleting signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+        $result = $this->wpdb->query($this->wpdb->prepare("DELETE FROM ".$this->tables['signup_field']['name']." WHERE signup_id = %d" , $id));
         if ($result === false) throw new DLS_SUS_Data_Exception('Error deleting signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
     }
