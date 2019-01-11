@@ -268,6 +268,7 @@ class DLS_Sign_Up_Sheet
 		        $return .= '
                     <form name="form1" method="post" action="">
                         <p>		
+                            <label for="signup_task_id">Sign-up for</label>
                             <select name="signup_task_id">'.$sheet_options.'</select>
                         </p>
                         <p>
