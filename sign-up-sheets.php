@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.11
+Version: 1.0.12
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -41,7 +41,7 @@ class DLS_Sign_Up_Sheet
     private $email_default_subject = 'Thank you for signing up!';
     private $request_uri;
     private $all_sheets_uri;
-    public $db_version = '1.0';
+    public $db_version = '1.1';
     private $wp_roles;
     public $detailed_errors = false;
     public $go_pro = '<div style="float: right; padding: .6em; text-align: center;" id="dls-sus-go-pro"><a class="button-primary" href="http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/" target="_blank">Upgrade to <strong>Sign-up Sheets Pro</strong></a></div>';
@@ -80,6 +80,7 @@ class DLS_Sign_Up_Sheet
         add_action('admin_init', array(&$this, 'dup_plugin_check'));
         add_filter("plugin_action_links_$plugin", array(&$this, 'admin_settings_link'));
         add_filter('admin_footer_text', array($this, 'admin_footer_text'), 100);
+        $this->activate();
     }
     
     /**
@@ -260,6 +261,8 @@ class DLS_Sign_Up_Sheet
 		    }
 	    }
 
+	    $fieldspec = $this->data->get_default_fieldspec();
+
         if(!$submitted) {
 	        if($open_sheets_exist) {
 		        $return .= '
@@ -282,8 +285,15 @@ class DLS_Sign_Up_Sheet
                         <p>
                             <label for="signup_phone">Phone</label>
                             <input type="text" id="signup_phone" name="signup_phone" value="'.((isset($_POST['signup_phone'])) ? esc_attr($_POST['signup_phone']) : '').'" />
-                        </p>
-                        <p>
+                        </p>';
+
+                        foreach ($fieldspec as $field) {
+	                        $return .= '<p>
+                                <label for="'.$field->field_name.'">'.$field->label.'</label>
+                                <input type="text" id="'.$field->field_name.'" name="'.$field->field_name.'" value="'.((isset($_POST[$field->field_name])) ? esc_attr($_POST[$field->field_name]) : '').'" />
+                            </p>';
+                        }
+                       $return .= '<p>
                             <label for="spam_check">Answer the following: 7 + 1 = </label>
                             <input type="text" id="spam_check" name="spam_check" size="4" value="'.((isset($_POST['spam_check'])) ? esc_attr($_POST['spam_check']) : '').'" />
                         </p>
@@ -794,6 +804,8 @@ class DLS_Sign_Up_Sheet
                 
                 echo '
                 </ul>
+                
+                <ul></ul>
                 <hr />
                 <p class="submit">
                     <input type="hidden" name="mode" value="submitted" />
@@ -1003,6 +1015,14 @@ class DLS_Sign_Up_Sheet
             trash BOOL NOT NULL DEFAULT FALSE,
             UNIQUE KEY id (id)
         );";
+	    $sql .= "CREATE TABLE {$this->data->tables['default_fieldspec']['name']} (
+            id INT NOT NULL AUTO_INCREMENT,
+            label VARCHAR(100) NOT NULL,
+            field_name VARCHAR(100) NOT NULL,
+            required TINYINT(1) NOT NULL DEFAULT 1,
+            position INT NOT NULL,
+            UNIQUE KEY id (id)
+        );";
         $sql .= "CREATE TABLE {$this->data->tables['task']['name']} (
             id INT NOT NULL AUTO_INCREMENT,
             sheet_id INT NOT NULL,
@@ -1018,6 +1038,13 @@ class DLS_Sign_Up_Sheet
             lastname VARCHAR(100) NOT NULL,
             email VARCHAR(100) NOT NULL,
             phone VARCHAR(50) NOT NULL,
+            UNIQUE KEY id (id)
+        );";
+	    $sql .= "CREATE TABLE {$this->data->tables['signup_field']['name']} (
+            id INT NOT NULL AUTO_INCREMENT,
+            signup_id INT NOT NULL,
+            fieldspec_id INT NOT NULL,
+            value VARCHAR(255) NOT NULL,
             UNIQUE KEY id (id)
         );";
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -1063,6 +1090,7 @@ class DLS_Sign_Up_Sheet
 	 * @return array
 	 */
 	private function submit_form( $err, $return ) {
+
 //Error Handling
 		if (
 			empty( $_POST['signup_firstname'] )

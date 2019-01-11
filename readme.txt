@@ -3,7 +3,7 @@ Contributors: dlsstudios
 Tags: sign up, signup, volunteer, PTO, timeslot, photographer, Non-profit, club, sign-up, signup sheet, sign-up sheet, sign up sheet
 Requires at least: 3.3
 Tested up to: 4.9.8
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv2 or later
 
 An online sign-up sheet manager where your users/volunteers can sign up for tasks
@@ -104,7 +104,7 @@ To filter by category, you can include the category id # in the shortcode to det
 
 == Upgrade Notice ==
 
-= 1.0.11 =
+= 1.0.12 =
 * Fixed fatal error when activating plugin in WP 4.5
 
 = 1.0.10 =
@@ -149,7 +149,7 @@ To filter by category, you can include the category id # in the shortcode to det
 
 == Changelog ==
 
-= 1.0.11 =
+= 1.0.12 =
 * Fixed fatal error when activating plugin in WP 4.5
 
 = 1.0.10 =

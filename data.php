@@ -25,6 +25,15 @@ class DLS_SUS_Data
                     'trash' => false,
                 ),
             ),
+            'default_fieldspec' => array(
+                'name' => $this->wpdb->prefix.'dls_sus_default_fieldspec',
+                'allowed_fields' => array(
+                    'label' => false,
+                    'field_name' => false,
+                    'required' => false,
+                    'position' => false,
+                ),
+            ),
             'task' => array(
                 'name' => $this->wpdb->prefix.'dls_sus_tasks',
                 'allowed_fields' => array(
@@ -42,6 +51,14 @@ class DLS_SUS_Data
                     'lastname' => false,
                     'email' => false,
                     'phone' => false,
+                ),
+            ),
+            'signup_field' => array(
+                'name' => $this->wpdb->prefix.'dls_sus_signup_field',
+                'allowed_fields' => array(
+                    'signup_id' => false,
+                    'fieldspec_id' => false,
+                    'value' => false,
                 ),
             ),
         );
@@ -78,6 +95,18 @@ class DLS_SUS_Data
         $results = $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM ".$this->tables['sheet']['name']." WHERE id = %d" , $id));
         $results = $this->stripslashes_full($results);
         return $results[0];
+    }
+     
+    /**
+     * Get all Sheets
+     * 
+     * @return    mixed    array of fieldspec
+     */
+    public function get_default_fieldspec()
+    {
+        $results = $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM ".$this->tables['default_fieldspec']['name']." ORDER BY position"));
+        $results = $this->stripslashes_full($results);
+        return $results;
     }
     
     /**
