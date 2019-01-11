@@ -1,11 +1,9 @@
 <?php
 /*
-Plugin Name: Sign-up Sheets
-Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
+Plugin Name: Sign-up Sheets (MC)
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
 Version: 1.0.12
-Author: DLS Software Studios
-Author URI: http://www.dlssoftwarestudios.com/
+Author: DLS Software Studios - Modified by Matt Clifton
 License: GPL2
 */
 
