@@ -3,7 +3,7 @@
 Plugin Name: Sign-up Sheets
 Plugin URI: http://www.dlssoftwarestudios.com/sign-up-sheets-wordpress-plugin/
 Description: An online sign-up sheet manager where your users/volunteers can sign up for tasks
-Version: 1.0.10
+Version: 1.0.11
 Author: DLS Software Studios
 Author URI: http://www.dlssoftwarestudios.com/
 License: GPL2
@@ -66,6 +66,7 @@ class DLS_Sign_Up_Sheet
         if (substr($this->all_sheets_uri, -1) == '&') $this->all_sheets_uri = substr($this->all_sheets_uri, 0, strlen($this->all_sheets_uri)-1);
 
         add_shortcode('sign_up_sheet', array(&$this, 'display_sheet'));
+	    add_shortcode('sign_up_sheet_form', array(&$this, 'display_form'));
         register_activation_hook(__FILE__, array(&$this, 'activate'));
         register_deactivation_hook( __FILE__, array(&$this, 'deactivate'));
 
@@ -255,6 +256,71 @@ class DLS_Sign_Up_Sheet
     }
 
     /**
+     * Output the volunteer signup form
+     *
+     * @param array $atts attributes from shortcode call
+     * @return string
+     */
+    function display_form($atts)
+    {
+        extract( shortcode_atts( array(
+            'id' => false,
+            'list_title' => 'Sign-up',
+        ), $atts ) );
+
+        // Display all active
+        $return = '<h2>'.$list_title.'</h2>';
+        $sheets = $this->data->get_sheets(false, true);
+        $sheets = array_reverse($sheets);
+
+        $return .= '
+			<h3>Sign-up below</h3>
+			
+            <p>You are signing up for... <em>'.$task->title.'</em></p>
+			<form name="form1" method="post" action="">
+                <p>		
+                    <select name="signup_task_id">';
+                     foreach ($sheets AS $sheet) {
+                        $open_spots = ($this->data->get_sheet_total_spots($sheet->id) - $this->data->get_sheet_signup_count($sheet->id));
+                        if($open_spots > 0) {
+	                        $return .= '<option value="'.$sheet->id.'">'.$sheet->title.'</option>';
+                        }
+                     }
+                 $return .= '</select>
+                </p>
+				<p>
+					<label for="signup_firstname">First Name</label>
+					<input type="text" id="signup_firstname" name="signup_firstname" value="'.((isset($_POST['signup_firstname'])) ? esc_attr($_POST['signup_firstname']) : '').'" />
+				</p>
+				<p>
+					<label for="signup_lastname">Last Name</label>
+					<input type="text" id="signup_lastname" name="signup_lastname" value="'.((isset($_POST['signup_lastname'])) ? esc_attr($_POST['signup_lastname']) : '').'" />
+				</p>
+				<p>
+					<label for="signup_email">E-mail</label>
+					<input type="text" id="signup_email" name="signup_email" value="'.((isset($_POST['signup_email'])) ? esc_attr($_POST['signup_email']) : '').'" />
+				</p>
+                <p>
+                    <label for="signup_phone">Phone</label>
+                    <input type="text" id="signup_phone" name="signup_phone" value="'.((isset($_POST['signup_phone'])) ? esc_attr($_POST['signup_phone']) : '').'" />
+                </p>
+				<p>
+					<label for="spam_check">Answer the following: 7 + 1 = </label>
+					<input type="text" id="spam_check" name="spam_check" size="4" value="'.((isset($_POST['spam_check'])) ? esc_attr($_POST['spam_check']) : '').'" />
+				</p>
+                <p class="submit">
+                	<input type="hidden" name="mode" value="submitted" />
+                	<input type="submit" name="Submit" class="button-primary" value="'.esc_attr('Sign me up!').'" />
+                    or <a href="'.$this->all_sheets_uri.((strstr($this->all_sheets_uri, '?') === false) ? '?' : '&amp;').'sheet_id='.$_GET['sheet_id'].'">&laquo; go back to the Sign-Up Sheet</a>
+                </p>
+			</form>
+		';
+	    $return .= '</div><!-- .dls-sus-sheet -->';
+
+        return $return;
+    }
+
+    /**
      * Display signup form
      *
      * @param int $task_id
@@ -307,7 +373,7 @@ class DLS_Sign_Up_Sheet
         add_options_page('Sign-up Sheets Settings', 'Sign-up Sheets', 'manage_options', $this->admin_settings_slug, array(&$this, 'admin_options'));
 
         // Utility Menu
-        add_utility_page('Sign-up Sheets', 'Sign-up Sheets', 'manage_signup_sheets', $this->admin_settings_slug.'_sheets', array(&$this, 'admin_sheet_page'), plugins_url( '/images/admin-icon.png', __FILE__ ));
+        add_menu_page('Sign-up Sheets', 'Sign-up Sheets', 'manage_signup_sheets', $this->admin_settings_slug.'_sheets', array(&$this, 'admin_sheet_page'), plugins_url( '/images/admin-icon.png', __FILE__ ));
         add_submenu_page($this->admin_settings_slug.'_sheets', 'Sign-up Sheets ', 'All Sheets', 'manage_signup_sheets', $this->admin_settings_slug.'_sheets', array(&$this, 'admin_sheet_page'));
         add_submenu_page($this->admin_settings_slug.'_sheets', 'Add New Sheet', 'Add New', 'manage_signup_sheets', $this->admin_settings_slug.'_modify_sheet', array(&$this, 'admin_modify_sheet_page'));
     }
