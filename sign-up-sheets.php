@@ -536,6 +536,7 @@ class DLS_Sign_Up_Sheet
             if (!($sheet = $this->data->get_sheet($_GET['sheet_id']))) {
                 echo '<p class="error">No sign-up sheet found.</p>';
             } else {
+
                 echo '
                 <h3>'.$sheet->title.'</h3>
                 
@@ -545,11 +546,14 @@ class DLS_Sign_Up_Sheet
                 
                 <h4>Signups</h4>
                 ';
-        
+
+
+
                 // Tasks
                 if (!($tasks = $this->data->get_tasks($sheet->id))) {
                     echo '<p>No tasks were found.</p>';
                 } else {
+	                $default_fieldspec = $this->data->get_default_fieldspec();
                     echo '
                         <table class="wp-list-table widefat" cellspacing="0">
                             <thead>
@@ -557,8 +561,11 @@ class DLS_Sign_Up_Sheet
                                     <th>What</th>
                                     <th>Name</th>
                                     <th>E-mail</th>
-                                    <th>Phone</th>
-                                    <th>Reminded *</th>
+                                    <th>Phone</th>';
+                                    foreach($default_fieldspec as $field) {
+                                        echo '<th>'.$field->label.'</th>';
+                                    }
+                                    echo '<th>Reminded *</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -568,17 +575,33 @@ class DLS_Sign_Up_Sheet
                                 echo '
                                     <tr>
                                         ';
-                                        
+
                                         $i=1;
                                         $signups = $this->data->get_signups($task->id);
                                         foreach ($signups AS $signup) {
+	                                        $signup_fields = $this->data->get_signup_fields( $signup->id );
+
+	                                        $signup_fields_by_fieldspec_id = array();
+	                                        foreach($signup_fields as $signup_field) {
+		                                        $signup_fields_by_fieldspec_id[$signup_field->fieldspec_id] = $signup_field;
+                                            }
+
+	                                        $ordered_fieldspec_ids = array_map( function ( $f ) {
+		                                        return $f->id;
+	                                        }, $default_fieldspec );
+
+	                                        $ordered_signup_fields = array_replace( array_flip( $ordered_fieldspec_ids ), $signup_fields_by_fieldspec_id );
+
                                             echo '
                                                 <tr>
                                                     <td>'.(($i === 1) ? $task->title : '' ).'</td>
                                                     <td>#'.$i.': <em>'.$signup->firstname.' '.$signup->lastname.'</em>
                                                     <td>'.$signup->email.'</td>
-                                                    <td>'.$signup->phone.'</td>
-                                                    <td>&nbsp;</td>
+                                                    <td>'.$signup->phone.'</td>';
+                                                    foreach($ordered_signup_fields as $d_signup_field) {
+	                                                    echo '<td>'.$d_signup_field->value.'</td>';
+                                                    }
+                                              echo '<td>&nbsp;</td>
                                                     <td><span class="delete"><a href="?page='.$this->admin_settings_slug.'_sheets&amp;sheet_id='.$_GET['sheet_id'].'&amp;signup_id='.$signup->id.'&amp;action=clear" onclick="return confirm(\'Are you sure you want to clear this spot?\');">Clear Spot</a></span></td>
                                                 </tr>
                                             ';

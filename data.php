@@ -161,6 +161,19 @@ class DLS_SUS_Data
         $results = $this->stripslashes_full($results);
         return $results;
     }
+
+    /**
+     * Get signups by task
+     *
+     * @param    int        id of signup
+     * @return    mixed    array of siginup_fields
+     */
+    public function get_signup_fields($signup_id)
+    {
+        $results = $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM ".$this->tables['signup_field']['name']." WHERE signup_id = %d" , $signup_id));
+        $results = $this->stripslashes_full($results);
+        return $results;
+    }
     
     /**
      * Get all data
