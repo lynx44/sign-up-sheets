@@ -104,7 +104,7 @@ class DLS_SUS_Data
      */
     public function get_default_fieldspec()
     {
-        $results = $this->wpdb->get_results($this->wpdb->prepare("SELECT * FROM ".$this->tables['default_fieldspec']['name']." ORDER BY position"));
+        $results = $this->wpdb->get_results("SELECT * FROM ".$this->tables['default_fieldspec']['name']." ORDER BY position;");
         $results = $this->stripslashes_full($results);
         return $results;
     }
