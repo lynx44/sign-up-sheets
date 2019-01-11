@@ -155,35 +155,7 @@ class DLS_Sign_Up_Sheet
 			    
 			    // Process Sign-up Form
 			    if ($submitted) {
-                    
-				    //Error Handling
-				    if (
-					    empty($_POST['signup_firstname'])
-					    || empty($_POST['signup_lastname'])
-					    || empty($_POST['signup_email'])
-                        || empty($_POST['signup_phone'])
-					    || empty($_POST['spam_check'])
-				    ) {
-					    $err++;
-					    $return .= '<p class="dls-sus error">'.__('Please complete all fields.').'</p>';
-				    } elseif (empty($_POST['spam_check']) || (!empty($_POST['spam_check']) && trim($_POST['spam_check']) != '8')) {
-                        $err++;
-                        $return .= '<p class="dls-sus error">'.__('Oh dear, 7 + 1 does not equal '.esc_attr($_POST['spam_check']).'. Please try again.').'</p>';
-                    }
-                    
-                    // Add Signup
-                    if (!$err) {
-                        try {
-                            $this->data->add_signup($_POST, $_GET['task_id']);
-                            $success = true;
-                            $return .= '<p class="dls-sus updated">'.__('You have been signed up!').'</p>';
-                            if ($this->send_mail($_POST['signup_email'], $_GET['task_id']) === false) $return .= 'ERROR SENDING EMAIL';
-                        } catch (DLS_SUS_Data_Exception $e) {
-                            $err++;
-                            $return .= '<p class="dls-sus error">'.__($e->getMessage()).'</p>';
-                        }
-                    }
-                    
+				    list( $err, $return, $success ) = $this->submit_form( $err, $return );
 			    }
                 
                 // Display Sign-up Form
@@ -269,53 +241,65 @@ class DLS_Sign_Up_Sheet
         ), $atts ) );
 
         // Display all active
-        $return = '<h2>'.$list_title.'</h2>';
+        $return = '';
         $sheets = $this->data->get_sheets(false, true);
         $sheets = array_reverse($sheets);
 
-        $return .= '
-			<h3>Sign-up below</h3>
-			
-            <p>You are signing up for... <em>'.$task->title.'</em></p>
-			<form name="form1" method="post" action="">
-                <p>		
-                    <select name="signup_task_id">';
-                     foreach ($sheets AS $sheet) {
-                        $open_spots = ($this->data->get_sheet_total_spots($sheet->id) - $this->data->get_sheet_signup_count($sheet->id));
-                        if($open_spots > 0) {
-	                        $return .= '<option value="'.$sheet->id.'">'.$sheet->title.'</option>';
-                        }
-                     }
-                 $return .= '</select>
-                </p>
-				<p>
-					<label for="signup_firstname">First Name</label>
-					<input type="text" id="signup_firstname" name="signup_firstname" value="'.((isset($_POST['signup_firstname'])) ? esc_attr($_POST['signup_firstname']) : '').'" />
-				</p>
-				<p>
-					<label for="signup_lastname">Last Name</label>
-					<input type="text" id="signup_lastname" name="signup_lastname" value="'.((isset($_POST['signup_lastname'])) ? esc_attr($_POST['signup_lastname']) : '').'" />
-				</p>
-				<p>
-					<label for="signup_email">E-mail</label>
-					<input type="text" id="signup_email" name="signup_email" value="'.((isset($_POST['signup_email'])) ? esc_attr($_POST['signup_email']) : '').'" />
-				</p>
-                <p>
-                    <label for="signup_phone">Phone</label>
-                    <input type="text" id="signup_phone" name="signup_phone" value="'.((isset($_POST['signup_phone'])) ? esc_attr($_POST['signup_phone']) : '').'" />
-                </p>
-				<p>
-					<label for="spam_check">Answer the following: 7 + 1 = </label>
-					<input type="text" id="spam_check" name="spam_check" size="4" value="'.((isset($_POST['spam_check'])) ? esc_attr($_POST['spam_check']) : '').'" />
-				</p>
-                <p class="submit">
-                	<input type="hidden" name="mode" value="submitted" />
-                	<input type="submit" name="Submit" class="button-primary" value="'.esc_attr('Sign me up!').'" />
-                    or <a href="'.$this->all_sheets_uri.((strstr($this->all_sheets_uri, '?') === false) ? '?' : '&amp;').'sheet_id='.$_GET['sheet_id'].'">&laquo; go back to the Sign-Up Sheet</a>
-                </p>
-			</form>
-		';
-	    $return .= '</div><!-- .dls-sus-sheet -->';
+        $submitted = (isset($_POST['mode']) && $_POST['mode'] == 'submitted');
+	    $err = 0;
+	    $success = false;
+
+	    $sheet_options = '';
+	    $open_sheets_exist = false;
+
+	    foreach ($sheets AS $sheet) {
+		    $open_spots = ($this->data->get_sheet_total_spots($sheet->id) - $this->data->get_sheet_signup_count($sheet->id));
+		    if($open_spots > 0) {
+			    $open_sheets_exist = true;
+			    $sheet_options .= '<option value="'.$sheet->id.'">'.$sheet->title.'</option>';
+		    }
+	    }
+
+        if(!$submitted) {
+	        if($open_sheets_exist) {
+		        $return .= '
+                    <form name="form1" method="post" action="">
+                        <p>		
+                            <select name="signup_task_id">'.$sheet_options.'</select>
+                        </p>
+                        <p>
+                            <label for="signup_firstname">First Name</label>
+                            <input type="text" id="signup_firstname" name="signup_firstname" value="'.((isset($_POST['signup_firstname'])) ? esc_attr($_POST['signup_firstname']) : '').'" />
+                        </p>
+                        <p>
+                            <label for="signup_lastname">Last Name</label>
+                            <input type="text" id="signup_lastname" name="signup_lastname" value="'.((isset($_POST['signup_lastname'])) ? esc_attr($_POST['signup_lastname']) : '').'" />
+                        </p>
+                        <p>
+                            <label for="signup_email">E-mail</label>
+                            <input type="text" id="signup_email" name="signup_email" value="'.((isset($_POST['signup_email'])) ? esc_attr($_POST['signup_email']) : '').'" />
+                        </p>
+                        <p>
+                            <label for="signup_phone">Phone</label>
+                            <input type="text" id="signup_phone" name="signup_phone" value="'.((isset($_POST['signup_phone'])) ? esc_attr($_POST['signup_phone']) : '').'" />
+                        </p>
+                        <p>
+                            <label for="spam_check">Answer the following: 7 + 1 = </label>
+                            <input type="text" id="spam_check" name="spam_check" size="4" value="'.((isset($_POST['spam_check'])) ? esc_attr($_POST['spam_check']) : '').'" />
+                        </p>
+                        <p class="submit">
+                            <input type="hidden" name="mode" value="submitted" />
+                            <input type="submit" name="Submit" class="button-primary" value="'.esc_attr('Sign me up!').'" />
+                        </p>
+                    </form>
+                ';
+            } else {
+	            $return .= '<div class="dls_sus_all_sheets_full_message"><em>Sorry, all sign-up slots have been filled.</em></div>';
+            }
+
+        } else {
+            list( $err, $return, $success ) = $this->submit_form( $err, $return );
+        }
 
         return $return;
     }
@@ -585,7 +569,7 @@ class DLS_Sign_Up_Sheet
                                                     <td>'.$signup->email.'</td>
                                                     <td>'.$signup->phone.'</td>
                                                     <td>&nbsp;</td>
-                                                    <td><span class="delete"><a href="?page='.$this->admin_settings_slug.'_sheets&amp;sheet_id='.$_GET['sheet_id'].'&amp;signup_id='.$signup->id.'&amp;action=clear">Clear Spot</a></span></td>
+                                                    <td><span class="delete"><a href="?page='.$this->admin_settings_slug.'_sheets&amp;sheet_id='.$_GET['sheet_id'].'&amp;signup_id='.$signup->id.'&amp;action=clear" onclick="return confirm(\'Are you sure you want to clear this spot?\');">Clear Spot</a></span></td>
                                                 </tr>
                                             ';
                                             $i++;
@@ -1071,6 +1055,49 @@ class DLS_Sign_Up_Sheet
             $role->remove_cap('manage_signup_sheets');
         }
     }
+
+	/**
+	 * @param $err
+	 * @param $return
+	 *
+	 * @return array
+	 */
+	private function submit_form( $err, $return ) {
+//Error Handling
+		if (
+			empty( $_POST['signup_firstname'] )
+			|| empty( $_POST['signup_lastname'] )
+			|| empty( $_POST['signup_email'] )
+			|| empty( $_POST['signup_phone'] )
+			|| empty( $_POST['spam_check'] )
+		) {
+			$err ++;
+			$return .= '<p class="dls-sus error">' . __( 'Please complete all fields.' ) . '</p>';
+		} elseif ( empty( $_POST['spam_check'] ) || ( ! empty( $_POST['spam_check'] ) && trim( $_POST['spam_check'] ) != '8' ) ) {
+			$err ++;
+			$return .= '<p class="dls-sus error">' . __( 'Oh dear, 7 + 1 does not equal ' . esc_attr( $_POST['spam_check'] ) . '. Please try again.' ) . '</p>';
+		}
+
+		echo("the message is displaying");
+		$task_id = $_GET['task_id'] ?? $_POST['signup_task_id'];
+		echo("task_id: " . $task_id);
+		// Add Signup
+		if ( ! $err ) {
+			try {
+				$this->data->add_signup( $_POST, $task_id );
+				$success = true;
+				$return  .= '<p class="dls-sus updated">' . __( 'You have been signed up!' ) . '</p>';
+				if ( $this->send_mail( $_POST['signup_email'], $task_id ) === false ) {
+					$return .= 'ERROR SENDING EMAIL';
+				}
+			} catch ( DLS_SUS_Data_Exception $e ) {
+				$err ++;
+				$return .= '<p class="dls-sus error">' . __( $e->getMessage() ) . '</p>';
+			}
+		}
+
+		return array( $err, $return, $success );
+	}
 	
 }
 
