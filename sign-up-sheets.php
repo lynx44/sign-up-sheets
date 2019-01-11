@@ -1106,9 +1106,8 @@ class DLS_Sign_Up_Sheet
 			$return .= '<p class="dls-sus error">' . __( 'Oh dear, 7 + 1 does not equal ' . esc_attr( $_POST['spam_check'] ) . '. Please try again.' ) . '</p>';
 		}
 
-		echo("the message is displaying");
 		$task_id = $_GET['task_id'] ?? $_POST['signup_task_id'];
-		echo("task_id: " . $task_id);
+
 		// Add Signup
 		if ( ! $err ) {
 			try {

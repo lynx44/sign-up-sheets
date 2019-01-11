@@ -272,6 +272,7 @@ class DLS_SUS_Data
     public function add_signup($fields, $task_id)
     {
         $clean_fields = $this->clean_array($fields, 'signup_');
+	    $all_clean_fields  = $this->clean_array( $fields, '' );
         $clean_fields = array_intersect_key($clean_fields, $this->tables['signup']['allowed_fields']);
         $clean_fields['task_id'] = $task_id;
         
@@ -284,8 +285,43 @@ class DLS_SUS_Data
         }
         
         $result = $this->wpdb->insert($this->tables['signup']['name'], $clean_fields);
+	    $signup_id = $this->wpdb->insert_id;
+        if ($result === false) throw new DLS_SUS_Data_Exception('Error adding signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
+
+	    $default_fieldspec_fields = $this->get_default_fieldspec_fields($all_clean_fields, $signup_id);
+	    echo("$default_fieldspec_fields");
+        foreach($default_fieldspec_fields as $row_data) {
+	        $result = $this->wpdb->insert($this->tables['signup_field']['name'], $row_data);
+        }
+
         if ($result === false) throw new DLS_SUS_Data_Exception('Error adding signup.'. (($this->detailed_errors === true) ? '.. '.print_r(mysql_error(), true) : ''));
         return $result;
+    }
+
+    private function get_default_fieldspec_fields($clean_fields, $signup_id) {
+	    $default_fieldspec_rows = $this->get_default_fieldspec();
+	    $default_fieldspec_names = array();
+	    foreach($default_fieldspec_rows as $fieldspec) {
+	    	$default_fieldspec_names[] = $fieldspec->field_name;
+	    }
+	    $default_fieldspec_by_name = array();
+	    foreach($default_fieldspec_rows as $fieldspec) {
+		    $default_fieldspec_by_name[$fieldspec->field_name] = $fieldspec;
+	    }
+	    $relevant_fields = array();
+
+	    foreach($clean_fields as $k=>$v) {
+	    	if(in_array($k, $default_fieldspec_names)) {
+			    $fieldspec = $default_fieldspec_by_name[$k];
+			    $column_values = array();
+			    $column_values['signup_id'] = $signup_id;
+			    $column_values['fieldspec_id'] = $fieldspec->id;
+			    $column_values['value'] = $v;
+			    $relevant_fields[] = $column_values;
+		    }
+	    }
+
+	    return $relevant_fields;
     }
     
     /**
