@@ -1128,11 +1128,10 @@ class DLS_Sign_Up_Sheet
 			$return .= '<p class="dls-sus error">' . __( 'Oh dear, 7 + 1 does not equal ' . esc_attr( $_POST['spam_check'] ) . '. Please try again.' ) . '</p>';
 		}
 
-		$task_id = $_GET['task_id'] ?? $_POST['signup_task_id'];
-
 		// Add Signup
 		if ( ! $err ) {
 			try {
+				$task_id = $_GET['task_id'] ?: $_POST['signup_task_id'];
 				$this->data->add_signup( $_POST, $task_id );
 				$success = true;
 				$return  .= '<p class="dls-sus updated">' . __( 'You have been signed up!' ) . '</p>';
