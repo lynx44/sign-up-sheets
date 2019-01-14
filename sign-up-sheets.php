@@ -384,6 +384,7 @@ class DLS_Sign_Up_Sheet
             'Confirmation E-mail Settings',
             array('Subject', 'dls_sus_email_subject', 'text', '(If blank, defaults to... "'.$this->email_default_subject.'")'),
             array('From E-mail Address', 'dls_sus_email_from', 'text', '(If blank, defaults to WordPress email on file under Settings > General)'),
+            array('Sheet Administrator Addresses', 'dls_sus_email_admin_emails', 'text', ''),
             array('Display detailed errors', 'dls_sus_detailed_errors', 'checkbox', '(It is recommended to leave this un-checked for production sites)'),
         );
         $hidden_field_name = 'submit_hidden';
@@ -844,25 +845,29 @@ class DLS_Sign_Up_Sheet
      * @param    int     $task_id
      * @return   bool
      */
-    public function send_mail($to, $task_id)
+    public function send_mail($to, $task_id, $name, $reply_to = null)
     {
         $task = $this->data->get_task($task_id);
         $sheet = $this->data->get_sheet($task->sheet_id);
         
         $from = get_option('dls_sus_email_from');
         if (empty($from)) $from = get_bloginfo('admin_email');
+        if ($reply_to == null)
+            $reply_to = $from;
         
         $subject = get_option('dls_sus_email_subject');
         if (empty($subject)) $subject = $this->email_default_subject;
         
         $headers = "From: ".get_bloginfo('name')." <$from>\n" .
-                "Reply-To: $from\n" .
+                "Reply-To: $reply_to\n" .
                 "Content-Type: text/plain; charset=iso-8859-1\n";
         $time_string = __('Y-m-d G:i:s');
         $time = date_i18n( __($time_string), current_time('timestamp') );
         $ip = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
 
-        $message = "This message was sent to confirm that you signed up for...\n\n".
+        $message =
+            "$name, \n\n".
+            "This message was sent to confirm that you signed up for...\n\n".
             (($sheet->date != '0000-00-00') ? "Date: ".date(get_option('date_format'), strtotime($sheet->date))."\n" : "").
             "Event: $sheet->title \n".
             "What: $task->title \n\n".
@@ -1135,7 +1140,10 @@ class DLS_Sign_Up_Sheet
 				$this->data->add_signup( $_POST, $task_id );
 				$success = true;
 				$return  .= '<p class="dls-sus updated">' . __( 'You have been signed up!' ) . '</p>';
-				if ( $this->send_mail( $_POST['signup_email'], $task_id ) === false ) {
+				if ( $this->send_mail( $_POST['signup_email'], $task_id, $_POST['signup_firstname'] . " " . $_POST['signup_lastname'] ) === false ) {
+					$return .= 'ERROR SENDING EMAIL';
+				}
+				if ( $this->send_mail( get_option('dls_sus_email_admin_emails'), $task_id, $_POST['signup_firstname']  . " " . $_POST['signup_lastname'], $_POST['signup_email'] ) === false ) {
 					$return .= 'ERROR SENDING EMAIL';
 				}
 			} catch ( DLS_SUS_Data_Exception $e ) {
